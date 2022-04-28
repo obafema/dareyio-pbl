@@ -16,6 +16,11 @@ ansible-config-mgt repository from github was cloned to the Jenkins-Ansible serv
 
 ![image](https://user-images.githubusercontent.com/87030990/165818723-b7f974e5-6b07-4d04-a9a2-2c8a3e05dcb2.png)
 
+Two new roles were added using ansible-galaxy collection:
+
+![image](https://user-images.githubusercontent.com/87030990/165839997-fd2c48d9-937b-4c22-89aa-c3d658890747.png)
+
+
 ### Step 2: Configuring Ansible For Jenkins Deployment
 
 Before installing Jenkins on the server, Jenkins Redhat Packages and Jenkins dependencies (epel release, remirepository and Java) were installed on the EC2 instance serving as Jenkins_ansible server.
@@ -420,8 +425,9 @@ Jenkins plugins (Plot plugin and artifactory) were installed
 
 Note: Plot plugin was used to display tests reports, and code coverage information while the Artifactory plugin was used to easily upload code artifacts into an Artifactory server.
 
-Spin up a new EC2 instance and install artifactory:
+Spin up a new EC2 instance and install artifactory and install artifactory:
 
+![image](https://user-images.githubusercontent.com/87030990/165840810-22ffe599-709e-482e-b1fb-8134f5217888.png)
 ![image](https://user-images.githubusercontent.com/87030990/165830633-20e15cef-8836-486a-a7e1-4c7aba8f1a49.png)
 ![image](https://user-images.githubusercontent.com/87030990/165830720-1ddf84d4-0ca4-4796-aae9-53c9c440c7f2.png)
 
@@ -521,7 +527,9 @@ sudo dnf --enablerepo=remi install php-phpunit-phploc
 wget -O phpunit https://phar.phpunit.de/phpunit-7.phar
 chmod +x phpunit
 sudo yum install php-xdebug
-
+````
+![image](https://user-images.githubusercontent.com/87030990/165841442-13733587-c2d0-4d73-b2b4-0ff8210404d1.png)
+![image](https://user-images.githubusercontent.com/87030990/165841501-aef71693-e0fe-40be-bb5a-b7fd64cea6aa.png)
 ![image](https://user-images.githubusercontent.com/87030990/165833086-c06100b4-acdf-4fb3-9b29-d64ef9c3c79c.png)
 
 No need to type git add ., git commit and git push again 
@@ -692,9 +700,8 @@ In Jenkins, install SonarScanner plugin and navigate to configure system in Jenk
 
 Add SonarQube server, setup SonarQube scanner from Jenkins and create webhook
 
-
-Setup SonarQube scanner from Jenkins – Global Tool Configuration
-Manage Jenkins > Configure System
+![image](https://user-images.githubusercontent.com/87030990/165842874-aa9193d9-32e5-4750-aff2-2b17f0cfc98a.png)
+![image](https://user-images.githubusercontent.com/87030990/165843158-6ce57412-7ef6-4a0d-a87f-34c06c05e564.png)
  
 On SonarQube UI
 
@@ -749,6 +756,7 @@ Add configuration related to php-todo Project
 
 **Challenge:** The pipeline failed after updating sonar-scanner.properties file.
 **Error message:** soar.source must be defined
+![image](https://user-images.githubusercontent.com/87030990/165844043-db85d124-1e30-42a0-b8ca-824a4405d38b.png)
 
 **Resolution:** sonar.sources was then added to the configuration.
 
@@ -760,7 +768,7 @@ sonar.sourceEncoding=UTF-8
 sonar.php.exclusions=**/vendor/**
 sonar.php.coverage.reportPaths=build/logs/clover.xml
 sonar.php.tests.reportPath=build/logs/junit.xml
-sonar.sources=
+sonar.sources=/var/lib/jenkins/workspace/php-todo_main/
 ````
 
 **HINT:** To know what exactly to put inside the 
@@ -864,4 +872,9 @@ Notice that with the current state of the code, it cannot be deployed to Integra
 
 Deploy the application to all the environments
 
+![image](https://user-images.githubusercontent.com/87030990/165848777-e40597e4-d8f5-44d6-8f5d-e703e7599c35.png)
 
+![image](https://user-images.githubusercontent.com/87030990/165848726-4be3b358-695a-473f-ae0b-0b6d04af649b.png)
+
+
+![image](https://user-images.githubusercontent.com/87030990/165848867-33703fc1-ddb3-44b0-9302-b871c428ac30.png)
