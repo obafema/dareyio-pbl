@@ -878,3 +878,5 @@ Deploy the application to all the environments
 
 
 ![image](https://user-images.githubusercontent.com/87030990/165848867-33703fc1-ddb3-44b0-9302-b871c428ac30.png)
+
+**Conclusion:** pipeline that simulates continuous integration and delivery for a PHP based application was successfully created
