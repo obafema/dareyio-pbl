@@ -56,6 +56,9 @@ Create RDS Subnet Group
 
 RDS Database was then created
 
+![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png)
+
+
 ![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/168443526-1b3ba60d-3957-411e-a9ae-a7ca198bdcac.png)
@@ -117,5 +120,28 @@ Wordpress susccesfully installed and accessed
 
 
 
+Healthcheck for target groups
 
+nginx
+![image](https://user-images.githubusercontent.com/87030990/169171990-6ce9f35a-2e18-4381-82d1-3d2409bda48f.png)
+
+tooling
+![image](https://user-images.githubusercontent.com/87030990/169172069-b82f545a-1d43-485f-ab68-0f639f479619.png)
+
+wordpress
+
+![image](https://user-images.githubusercontent.com/87030990/169172139-a229e1c4-df4c-4bd9-9f03-1d9f182ba57a.png)
+
+
+launch temp
+
+![image](https://user-images.githubusercontent.com/87030990/169172187-3d55a272-af0f-41e1-a654-02fecb06faec.png)
+
+Auto Scaling Group
+
+![image](https://user-images.githubusercontent.com/87030990/169172317-e417173b-c774-4811-9928-dc5c365f342d.png)
+
+A Records for Route 53
+
+![image](https://user-images.githubusercontent.com/87030990/169172396-4b6408ee-19d5-4416-b236-7502b10cb5cc.png)
 
