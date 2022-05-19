@@ -30,32 +30,29 @@ Security Group for External Public Facing Application Load Balancer, Nginx Serve
 
 ![image](https://user-images.githubusercontent.com/87030990/169407228-a6569dad-cc86-494c-9648-979b7217a684.png)
 
-Create Certificate
+Create Public Certificate was created for toolingobaf.ga
 
 ![image](https://user-images.githubusercontent.com/87030990/168501077-1ba5a3a7-053c-43ba-944d-4aa624e0db80.png)
 
 
-Create EFS
+EFS was created
 
 ![image](https://user-images.githubusercontent.com/87030990/168502266-93b09fe8-baaa-458b-b35d-28b6820ed293.png)
 
 
-Create RDS
+#### To create Relational Database System
 
 Prerequisite for creating RDS
 
-1ST Create KMS Key
+KMS Key and RDS Subnet Group were created
 
 ![image](https://user-images.githubusercontent.com/87030990/168502204-65a1ead3-6558-4ba0-87c0-45dec2f97819.png)
-
-Create RDS Subnet Group
 
 ![image](https://user-images.githubusercontent.com/87030990/168502629-e08a220d-4f6c-4580-bae5-8ec4133570da.png)
 
 RDS Database was then created
 
 ![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png)
-
 
 ![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
 
