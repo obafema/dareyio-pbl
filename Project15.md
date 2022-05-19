@@ -15,22 +15,20 @@ Internet Gateway was created for accessibility by the public from the internet a
 
 ![image](https://user-images.githubusercontent.com/87030990/169171022-a93c5563-edc5-4500-9e51-cb2c8bd9c75b.png)
 
-Route table for public subnets was created and associated with the 2 public subnets
+Route table for public subnets was created and associated with the 2 public subnets. Route FOR Internet gateway was added to the routing table for public subnets
 
 ![image](https://user-images.githubusercontent.com/87030990/169171193-ffa2e91a-3301-4c8e-aa0d-c9191080c3fd.png)
 
-Route table for private subnet was created and associated with the 4 private subnets. Internet gateway route was added to the routing table for public subnets
-
+Route table for private subnet was created and associated with the 4 private subnets. 
 ![image](https://user-images.githubusercontent.com/87030990/169171259-8ef97727-b3ff-4ad3-a051-524b94975a75.png)
-
 
 NAT Gateway was created in the public subnet and an Elastic IP allocated to it. Route for the NAT gateway was added to routing table for private subnets
 
-![image](https://user-images.githubusercontent.com/87030990/168487053-cbb58df9-6d25-4b5b-8220-2bc73494e37f.png)
+![image](https://user-images.githubusercontent.com/87030990/169406792-80a6a197-de60-44ef-8f7d-4943bb578062.png)
 
 Security Group for External Public Facing Application Load Balancer, Nginx Servers, Bastion Servers, Internal Non Public Facing Application Load Balancer, Webservers and Data Layer were created
 
-![image](https://user-images.githubusercontent.com/87030990/168500344-726d7efd-9e1a-4585-ac05-e448fda093b2.png)
+![image](https://user-images.githubusercontent.com/87030990/169407228-a6569dad-cc86-494c-9648-979b7217a684.png)
 
 Create Certificate
 
