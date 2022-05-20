@@ -30,13 +30,15 @@ Security Group for External Public Facing Application Load Balancer, Nginx Serve
 
 ![image](https://user-images.githubusercontent.com/87030990/169407228-a6569dad-cc86-494c-9648-979b7217a684.png)
 
+
 #### Step 2: Register a Domain and configure secured connection using SSL/TLS certificates
 
 Domain (toolingobaf.ga) was used for the implimentation
 
-TLS Certificates was configured for *.toolingobaf.ga
+TLS Certificates was configured for *.toolingobaf.ga to handle secured connectivity to your Application Load Balancers (ALB)
 
 ![image](https://user-images.githubusercontent.com/87030990/168501077-1ba5a3a7-053c-43ba-944d-4aa624e0db80.png)
+
 
 #### Step 3: Create the Data layer, which is comprised of Amazon Relational Database Service (RDS) and Amazon Elastic File System (EFS)
 
@@ -49,7 +51,7 @@ EFS was created with access points for both tooling and wordpress
 
 Prerequisite for creating Relational Database System (RDS)
 
-KMS Key and RDS Subnet Group were created
+Create a KMS key from Key Management Service (KMS) to be used to encrypt the database instance and RDS Subnet Group were created
 
 ![image](https://user-images.githubusercontent.com/87030990/168502204-65a1ead3-6558-4ba0-87c0-45dec2f97819.png)
 
@@ -57,97 +59,84 @@ KMS Key and RDS Subnet Group were created
 
 RDS Database was then created
 
-![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png
+![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png)
 
 
 
 #### Step 4: Set up Compute Resources inside the VPC
 
-For a start a base image was chosen from Amazon Market Place to help in building our own images
+For a start a EC2 instance based on RedHat was chosen from Amazon Market Place to help in building our own images and relevant software(python, ntp, net-tools, vim, wget, telnet, epel-release, htop) and licence installed (SSL). YThis was done for
 
-A base-ami(s) from amazon market place was launched and used to create my images
+* bastion server
+* nginx reverse-proxy
+* webservers (for tooling and wordpress)
+
 
 ![image](https://user-images.githubusercontent.com/87030990/169170229-eedb60ef-a32d-430b-8fa1-8dea5158467c.png)
 
-Launch Templates were created for bastion, nginx, tooling webserver and wordpress webserver:
 
-![image](https://user-images.githubusercontent.com/87030990/169170363-83adb468-d691-462f-9c46-ad655357b3cc.png)
+Target group(s) for nginx, tooling and wordpress were created
 
-External and Internal Load Balancers and the target groups were created
+![image](https://user-images.githubusercontent.com/87030990/169605243-46e93532-a910-4d93-8864-84bb3181b8fc.png)
+
+External Application Load Balancer to forward internet traffic to the nginx and Internal Application Load Balancers to route traffic to the Web Servers by assigning appropriate target groups
 
 ![image](https://user-images.githubusercontent.com/87030990/168461959-91e6e1cb-157f-411c-9a04-706a0680b83f.png)
 
+Launch Templates were created with parameters (appropriate Userdata) to launch an instances for bastion, nginx, tooling webserver and wordpress webserver:
 
+![image](https://user-images.githubusercontent.com/87030990/169170363-83adb468-d691-462f-9c46-ad655357b3cc.png)
 
-
-
-RDS Database was created
-
-
-
-Auto Scaling Groups for Bastion and nginx were created
+Auto Scaling Groups for Bastion and nginx were created first
 
 ![image](https://user-images.githubusercontent.com/87030990/169576719-b318d248-6bcb-4f30-8712-6e01efd2ffe1.png)
 
-Database for tooling and wordpress named toolingdb and wordpressdb were created by login into the rds from the bastion server
+Database for tooling and wordpress named **toolingdb** and **wordpressdb** were created by login into the RDS from the bastion server
+
+![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/169141762-6cff404c-f0ee-4fbd-af11-cad7fcf19989.png)
 
+Auto Scaling Groups for tooling and wordpress were also created
 
-In the Route 53, Records were created for tooling and wordpress for accessibility
+![image](https://user-images.githubusercontent.com/87030990/169606056-9d24cef6-25cd-4bf9-9fe4-aff90f5d488f.png)
+
+The health status of each insances were verified to b healthy:
+
+For nginx
+
+![image](https://user-images.githubusercontent.com/87030990/169608976-ca142750-4a9c-4920-bdd2-50d7b1546639.png)
+
+
+For Wordpress
+
+![image](https://user-images.githubusercontent.com/87030990/169608779-1f2c09a8-9629-4f8f-a192-390348fa9863.png)
+
+For Tooling
+
+![image](https://user-images.githubusercontent.com/87030990/169172069-b82f545a-1d43-485f-ab68-0f639f479619.png)
+
+#### Step 5: Configuring DNS with Route53
+
+In the Route 53, A and alias Records were created for tooling and wordpress for accessibility from the internet
 
 ![image](https://user-images.githubusercontent.com/87030990/169151283-2347b07e-2ad0-4b92-8100-48ba81e6287b.png)
 
+An alias record was created for the root domain and its traffic directed to the ALB DNS name while alias record was also created for tooling.toolingobaf.ga and its traffic directed to the ALB DNS name.
 
-Wordpress target group healthy
-![image](https://user-images.githubusercontent.com/87030990/169155769-34b99ea2-e064-419d-8f46-587d7ca1bdb3.png)
+![image](https://user-images.githubusercontent.com/87030990/169607954-07aff919-0009-46af-9d98-31d4c8fd886b.png)
 
-Wordpress susccesfully installed and accessed
+The infrastruction was tested and confirmed to be successful with results below for both websites. One of the nginx instance was stopped to test availability and there was not web failure.
+
+#### Step 6: Check access to the websites from a browser
+
+Wordpress susccesfully launched
 
 ![image](https://user-images.githubusercontent.com/87030990/169169246-b2d25919-8432-4a9c-a0f0-0a4562099522.png)
 
 
-
-
-
-
-
-
-Healthcheck for target groups
-
-nginx
-![image](https://user-images.githubusercontent.com/87030990/169171990-6ce9f35a-2e18-4381-82d1-3d2409bda48f.png)
-
-tooling
-![image](https://user-images.githubusercontent.com/87030990/169172069-b82f545a-1d43-485f-ab68-0f639f479619.png)
-
-wordpress
-
-![image](https://user-images.githubusercontent.com/87030990/169172139-a229e1c4-df4c-4bd9-9f03-1d9f182ba57a.png)
-
-
-launch temp
-
-![image](https://user-images.githubusercontent.com/87030990/169172187-3d55a272-af0f-41e1-a654-02fecb06faec.png)
-
-Auto Scaling Group
-
-![image](https://user-images.githubusercontent.com/87030990/169172317-e417173b-c774-4811-9928-dc5c365f342d.png)
-
-
-
-
-![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
-
-A Records for Route 53
-
-![image](https://user-images.githubusercontent.com/87030990/169172396-4b6408ee-19d5-4416-b236-7502b10cb5cc.png)
-
-wordpress.toolingobaf.ga was successful launched
-
-![image](https://user-images.githubusercontent.com/87030990/169570493-9f84fa4a-2900-4402-81c0-79218b4b043b.png)
-
-
-tooling.toolingobaf.ga was successfully launched
+Tooling susccesfully launched
 
 ![image](https://user-images.githubusercontent.com/87030990/169570308-1a6389d9-a6e1-449c-98cc-d5f7d44bf5d9.png)
+
+**Conclusion:** A secured, scalable and cost-effective infrastructure to host 2 enterprise websites using various Cloud services from AWS was successfully implemented
