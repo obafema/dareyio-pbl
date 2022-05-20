@@ -78,7 +78,7 @@ Target group(s) for nginx, tooling and wordpress were created
 
 ![image](https://user-images.githubusercontent.com/87030990/169605243-46e93532-a910-4d93-8864-84bb3181b8fc.png)
 
-External Application Load Balancer to forward internet traffic to the nginx and Internal Application Load Balancers to route traffic to the Web Servers by assigning appropriate target groups
+External Application Load Balancer to forward internet traffic to the nginx and Internal Application Load Balancers to route traffic to the Web Servers by assigning appropriate target groups were created
 
 ![image](https://user-images.githubusercontent.com/87030990/168461959-91e6e1cb-157f-411c-9a04-706a0680b83f.png)
 
@@ -90,7 +90,7 @@ Auto Scaling Groups for Bastion and nginx were created first
 
 ![image](https://user-images.githubusercontent.com/87030990/169576719-b318d248-6bcb-4f30-8712-6e01efd2ffe1.png)
 
-Database for tooling and wordpress named **toolingdb** and **wordpressdb** were created by login into the RDS from the bastion server
+Database for tooling and wordpress named **toolingdb** and **wordpressdb** were created by login into the RDS database from the bastion server
 
 ![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
 
@@ -100,20 +100,20 @@ Auto Scaling Groups for tooling and wordpress were also created
 
 ![image](https://user-images.githubusercontent.com/87030990/169606056-9d24cef6-25cd-4bf9-9fe4-aff90f5d488f.png)
 
-The health status of each insances were verified to b healthy:
+The health status of each insances were verified to be healthy:
 
 For nginx
 
 ![image](https://user-images.githubusercontent.com/87030990/169608976-ca142750-4a9c-4920-bdd2-50d7b1546639.png)
 
-
 For Wordpress
 
-![image](https://user-images.githubusercontent.com/87030990/169608779-1f2c09a8-9629-4f8f-a192-390348fa9863.png)
+![image](https://user-images.githubusercontent.com/87030990/169614889-94c3f6af-6aa5-4977-9d0e-c8a3d270a556.png)
 
 For Tooling
 
 ![image](https://user-images.githubusercontent.com/87030990/169172069-b82f545a-1d43-485f-ab68-0f639f479619.png)
+
 
 #### Step 5: Configuring DNS with Route53
 
@@ -127,15 +127,16 @@ An alias record was created for the root domain and its traffic directed to the 
 
 The infrastruction was tested and confirmed to be successful with results below for both websites. One of the nginx instance was stopped to test availability and there was not web failure.
 
+
 #### Step 6: Check access to the websites from a browser
 
 Wordpress susccesfully launched
 
 ![image](https://user-images.githubusercontent.com/87030990/169169246-b2d25919-8432-4a9c-a0f0-0a4562099522.png)
 
-
 Tooling susccesfully launched
 
 ![image](https://user-images.githubusercontent.com/87030990/169570308-1a6389d9-a6e1-449c-98cc-d5f7d44bf5d9.png)
+
 
 **Conclusion:** A secured, scalable and cost-effective infrastructure to host 2 enterprise websites using various Cloud services from AWS was successfully implemented
