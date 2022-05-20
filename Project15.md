@@ -15,7 +15,7 @@ Internet Gateway was created for accessibility by the public from the internet a
 
 ![image](https://user-images.githubusercontent.com/87030990/169171022-a93c5563-edc5-4500-9e51-cb2c8bd9c75b.png)
 
-Route table for public subnets was created and associated with the 2 public subnets. Route FOR Internet gateway was added to the routing table for public subnets
+Route table for public subnets was created and associated with the 2 public subnets. Route for Internet Gateway(igw) was added to the routing table for public subnets
 
 ![image](https://user-images.githubusercontent.com/87030990/169171193-ffa2e91a-3301-4c8e-aa0d-c9191080c3fd.png)
 
@@ -30,19 +30,24 @@ Security Group for External Public Facing Application Load Balancer, Nginx Serve
 
 ![image](https://user-images.githubusercontent.com/87030990/169407228-a6569dad-cc86-494c-9648-979b7217a684.png)
 
-Create Public Certificate was created for toolingobaf.ga
+#### Step 2: Register a Domain and configure secured connection using SSL/TLS certificates
+
+Domain (toolingobaf.ga) was used for the implimentation
+
+TLS Certificates was configured for *.toolingobaf.ga
 
 ![image](https://user-images.githubusercontent.com/87030990/168501077-1ba5a3a7-053c-43ba-944d-4aa624e0db80.png)
 
+#### Step 3: Create the Data layer, which is comprised of Amazon Relational Database Service (RDS) and Amazon Elastic File System (EFS)
 
-EFS was created
+EFS was created with access points for both tooling and wordpress
 
-![image](https://user-images.githubusercontent.com/87030990/168502266-93b09fe8-baaa-458b-b35d-28b6820ed293.png)
+![image](https://user-images.githubusercontent.com/87030990/169599495-b30fe8e8-33cb-411d-9b76-4ad47ed85ac6.png)
+
+![image](https://user-images.githubusercontent.com/87030990/169597010-4b486e03-a232-4c2b-8199-fd6e27ee925d.png)
 
 
-#### To create Relational Database System
-
-Prerequisite for creating RDS
+Prerequisite for creating Relational Database System (RDS)
 
 KMS Key and RDS Subnet Group were created
 
@@ -52,22 +57,15 @@ KMS Key and RDS Subnet Group were created
 
 RDS Database was then created
 
-![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png)
-
-![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
-
-![image](https://user-images.githubusercontent.com/87030990/168443526-1b3ba60d-3957-411e-a9ae-a7ca198bdcac.png)
-
-Wordpress Website
-![image](https://user-images.githubusercontent.com/87030990/169168649-6144fa23-6f78-45e9-baaf-0cb0a8fecbe7.png)
+![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png
 
 
 
-#### Step 2: Set up Compute Resources inside the VPC
+#### Step 4: Set up Compute Resources inside the VPC
 
-For a start a base imsge was chosen to help in building our own images (CentOS was chosen from AWS Market Place)
+For a start a base image was chosen from Amazon Market Place to help in building our own images
 
-A base-ami from amazon market place was launched and used to create my images
+A base-ami(s) from amazon market place was launched and used to create my images
 
 ![image](https://user-images.githubusercontent.com/87030990/169170229-eedb60ef-a32d-430b-8fa1-8dea5158467c.png)
 
@@ -87,16 +85,16 @@ RDS Database was created
 
 
 
+Auto Scaling Groups for Bastion and nginx were created
+
+![image](https://user-images.githubusercontent.com/87030990/169576719-b318d248-6bcb-4f30-8712-6e01efd2ffe1.png)
+
 Database for tooling and wordpress named toolingdb and wordpressdb were created by login into the rds from the bastion server
 
 ![image](https://user-images.githubusercontent.com/87030990/169141762-6cff404c-f0ee-4fbd-af11-cad7fcf19989.png)
 
-Auto Scaling Groups was created
 
-![image](https://user-images.githubusercontent.com/87030990/169170058-3f66f1fd-824a-41e5-90c0-ae645aacd2e1.png)
-
-
-In the Route 53, Records were created for tooling and wordpress Load Balancing
+In the Route 53, Records were created for tooling and wordpress for accessibility
 
 ![image](https://user-images.githubusercontent.com/87030990/169151283-2347b07e-2ad0-4b92-8100-48ba81e6287b.png)
 
@@ -136,7 +134,20 @@ Auto Scaling Group
 
 ![image](https://user-images.githubusercontent.com/87030990/169172317-e417173b-c774-4811-9928-dc5c365f342d.png)
 
+
+
+
+![image](https://user-images.githubusercontent.com/87030990/169141490-3fe248bb-416e-443a-b747-9f9ecd6bbac1.png)
+
 A Records for Route 53
 
 ![image](https://user-images.githubusercontent.com/87030990/169172396-4b6408ee-19d5-4416-b236-7502b10cb5cc.png)
 
+wordpress.toolingobaf.ga was successful launched
+
+![image](https://user-images.githubusercontent.com/87030990/169570493-9f84fa4a-2900-4402-81c0-79218b4b043b.png)
+
+
+tooling.toolingobaf.ga was successfully launched
+
+![image](https://user-images.githubusercontent.com/87030990/169570308-1a6389d9-a6e1-449c-98cc-d5f7d44bf5d9.png)
