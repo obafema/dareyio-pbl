@@ -17,10 +17,10 @@ Internet Gateway was created for accessibility by the public from the internet a
 
 Route table for public subnets was created and associated with the 2 public subnets. Route for Internet Gateway(igw) was added to the routing table for public subnets
 
-![image](https://user-images.githubusercontent.com/87030990/169171193-ffa2e91a-3301-4c8e-aa0d-c9191080c3fd.png)
+![image](https://user-images.githubusercontent.com/87030990/169610632-a161418e-cc7b-48e4-a1c1-7474f33f3665.png)
 
 Route table for private subnet was created and associated with the 4 private subnets. 
-![image](https://user-images.githubusercontent.com/87030990/169171259-8ef97727-b3ff-4ad3-a051-524b94975a75.png)
+![image](https://user-images.githubusercontent.com/87030990/169610709-d9cae8ca-e54a-461f-84ec-802951e2cfa9.png)
 
 NAT Gateway was created in the public subnet and an Elastic IP allocated to it. Route for the NAT gateway was added to routing table for private subnets
 
@@ -33,43 +33,42 @@ Security Group for External Public Facing Application Load Balancer, Nginx Serve
 
 #### Step 2: Register a Domain and configure secured connection using SSL/TLS certificates
 
-Domain (toolingobaf.ga) was used for the implimentation
+Domain **(toolingobaf.ga)** was used for the implimentation
 
-TLS Certificates was configured for *.toolingobaf.ga to handle secured connectivity to your Application Load Balancers (ALB)
+TLS Certificates was configured for ***.toolingobaf.ga** to handle secured connectivity to the Application Load Balancers (ALB)
 
 ![image](https://user-images.githubusercontent.com/87030990/168501077-1ba5a3a7-053c-43ba-944d-4aa624e0db80.png)
 
 
 #### Step 3: Create the Data layer, which is comprised of Amazon Relational Database Service (RDS) and Amazon Elastic File System (EFS)
 
-EFS was created with access points for both tooling and wordpress
+EFS was created with access points for both **tooling** and **wordpress**
 
 ![image](https://user-images.githubusercontent.com/87030990/169599495-b30fe8e8-33cb-411d-9b76-4ad47ed85ac6.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/169597010-4b486e03-a232-4c2b-8199-fd6e27ee925d.png)
 
 
-Prerequisite for creating Relational Database System (RDS)
+**Prerequisite for creating Relational Database System (RDS)**
 
-Create a KMS key from Key Management Service (KMS) to be used to encrypt the database instance and RDS Subnet Group were created
+Create a **KMS key from Key Management Service (KMS)** to be used to encrypt the database instance and RDS Subnet Group were created
 
 ![image](https://user-images.githubusercontent.com/87030990/168502204-65a1ead3-6558-4ba0-87c0-45dec2f97819.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/168502629-e08a220d-4f6c-4580-bae5-8ec4133570da.png)
 
-RDS Database was then created
+**RDS Databas**e was then created
 
 ![image](https://user-images.githubusercontent.com/87030990/169172480-4c41e9cc-8f35-48ce-a082-25034e30ff7c.png)
 
 
-
 #### Step 4: Set up Compute Resources inside the VPC
 
-For a start a EC2 instance based on RedHat was chosen from Amazon Market Place to help in building our own images and relevant software(python, ntp, net-tools, vim, wget, telnet, epel-release, htop) and licence installed (SSL). YThis was done for
+For a start a EC2 instance based on RedHat was chosen from Amazon Market Place to help in building my own AMI and relevant software **(python, ntp, net-tools, vim, wget, telnet, epel-release, htop)** and licence installed (SSL). YThis was done for
 
-* bastion server
-* nginx reverse-proxy
-* webservers (for tooling and wordpress)
+* Bastion server (Userdata configured to update yum package repository and install Ansible and git)
+* Nginx reverse-proxy (Userdata configured to update yum package repository and install nginx)
+* Webservers (Userdata to update yum package repository. Install wordpress only required on the Wordpress launch template)
 
 
 ![image](https://user-images.githubusercontent.com/87030990/169170229-eedb60ef-a32d-430b-8fa1-8dea5158467c.png)
