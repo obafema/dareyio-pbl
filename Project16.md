@@ -2,7 +2,9 @@
 
 **Objective:**: To create and delete AWS Network infrastructure programmatically using Terraform
 
-S3 bucket named was created to store Terraform state file and programmatic CLI access to AWS was also confirmed running **aws s3 ls** command
+Programmatic access was configured from the workstation to connect to AWS using the access keys created and a Python SDK (boto3) installed.
+
+S3 bucket named was created on AWS to store Terraform state file and programmatic CLI access to AWS from the workstation was also confirmed by running **aws s3 ls** command
 
 ```bash
 aws s3 ls
@@ -21,6 +23,8 @@ for bucket in s3.buckets.all():
 
 #### Step 1: Create VPC and Subnets
 
+Directory structure was created using Visual Studio Code by creating a folder named **PBL**. A file named **main.tf** was then created inside the PBL
+
 AWS Provider and resource to create VPC was added to **main.tf** file created:
 ![image](https://user-images.githubusercontent.com/87030990/172056782-8a5999e5-4eef-491c-bc91-703eefbc5852.png)
 
@@ -28,14 +32,15 @@ Plugin for AWS Provider was downloaded using **terraform init** command
 
 ![image](https://user-images.githubusercontent.com/87030990/172057476-c3361a61-487d-4500-86d9-acb911ca872c.png)
 
-**aws_vpc** resource was created using **terraform apply** after checking what terraform intends to created using **terraform plan** command
+**aws_vpc** resource was created using **terraform apply** after checking what terraform intends to create using **terraform plan** command
 ![image](https://user-images.githubusercontent.com/87030990/172057738-4d758054-a8b3-44bc-b31e-9a5c70d08e80.png)
 ![image](https://user-images.githubusercontent.com/87030990/172058611-110206cc-6c2b-4a2a-b050-9477f27dd5ee.png)
 
-Resources to create 6 Subnets(2 Public and 4 Private Subnets) in 2 Availability Zones was added to the **main.tf** file 
+Resources to create Subnets (2 Public Subnets) in 2 Availability Zones was added to the **main.tf** file.
+
 N.B: **vpc_id** argument was used to interpolate the value of the VPC id by setting it to **aws_vpc.main.id**. This way, Terraform knows inside which VPC to create the subnet.
 
-The 2 public subnets were first created for a start with 2 resource blocks (hard coded values for the **availability_zone** and **cidr_block**) and was confirmed successfully created on aws
+The 2 public subnets were first created for a start with 2 resource blocks with hard coded values for the **availability_zone** and **cidr_block** and was confirmed successfully created on aws
 
 ![image](https://user-images.githubusercontent.com/87030990/172059095-766ddf75-9002-4f5e-8311-672305bdc606.png)
 ![image](https://user-images.githubusercontent.com/87030990/172058564-a326fbcf-039b-4253-8a17-9ece7f232b9f.png)
@@ -54,7 +59,7 @@ Starting with the **provider block**, a **variable** named **region** was declar
 
 ![image](https://user-images.githubusercontent.com/87030990/172060432-9a882989-75db-476e-bb77-0bb6616d7a12.png)
 
-Fixing multiple resource blocks by introducing concept of Loops & Data sources to fetch information from AWS (outside of Terraform)
+Multiple resource blocks was also fixed by introducing concept of Loops & Data sources to fetch information from AWS (outside of Terraform)
 The code below was added to fetch Availability zones from AWS, and replace the hard coded value in the subnet’s availability_zone section.
 
 ````bash
@@ -65,7 +70,7 @@ The code below was added to fetch Availability zones from AWS, and replace the h
  ````
 To make use of this new data resource, a count argument was introduced in the subnet block to tell terraform the number of resources to be created:
 ````bash
-# Create public subnet1
+# Create public subnet
     resource "aws_subnet" "public" { 
         count                   = 2
         vpc_id                  = aws_vpc.main.id
@@ -102,7 +107,7 @@ The count argument was updated with a condition for Terraform to check first if 
 resource "aws_subnet" "public" {
   count  = var.preferred_number_of_public_subnets == null ? length(data.aws_availability_zones.available.names) : var.preferred_number_of_public_subnets   
   vpc_id = aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpc_cidr, 4 , count.index)
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8 , count.index)
   map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.available.names[count.index]
 
@@ -113,9 +118,9 @@ Running terraform plan give the output below
 
 ![image](https://user-images.githubusercontent.com/87030990/172062746-9f38713e-62f1-4c7e-a82f-791ad0bf60f5.png)
 
-#### Introducing variables.tf & terraform.tfvars
+#### Step3: Introducing variables.tf & terraform.tfvars
 
-Variables.tf and terraform.tfvars file were introduced and declared variables and defaults values copied into them respectively
+**Variables.tf** and **terraform.tfvars** file were introduced and declared variables and defaults values copied into them respectively
 
 ![image](https://user-images.githubusercontent.com/87030990/172063780-8d106d8d-d4e8-45e5-a7fe-eed3ee376a51.png)
 
@@ -124,5 +129,5 @@ terraform apply was run to create the vpc and the 2 public subnets after running
 ![image](https://user-images.githubusercontent.com/87030990/172063903-f5dadd43-95da-48c9-b6be-8f0a335703c2.png)
 ![image](https://user-images.githubusercontent.com/87030990/172063929-ffac891e-9ed9-4cc7-b092-bb8521594200.png)
 
-File structure
+
 Conclusion: AWS Network infrastructure was successfully created and deleted programmatically using Terraform
