@@ -195,3 +195,31 @@ Create asg-bastion-nginx.tf and paste all the code snippet below
 
 
 STORAGE AND DATABASE
+Create Elastic File System (EFS)
+In order to create an EFS you need to create a KMS key.
+
+
+Error while creating rds subnet group. The 3rd and 4th subnets were shuffled into the same AZ
+![image](https://user-images.githubusercontent.com/87030990/173157057-99366f11-72d0-4663-b010-87d8de5923b9.png)
+![image](https://user-images.githubusercontent.com/87030990/173161956-2a767290-3927-49c6-abb3-70d6ad41f56e.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173161920-850210a0-26de-4c10-a265-fc8c431fb93d.png)
+
+Create Relational Database System(RDS)
+Create subnet group first
+![image](https://user-images.githubusercontent.com/87030990/173162025-cb803b72-4970-4805-a773-fe811c3cdc71.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162045-f8200da5-d47e-4155-97c7-cca9073406c3.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162071-8e47f573-6886-43bd-8485-c17a60397669.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162127-28f8b02c-5a92-4959-9418-c4b2604164ab.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162166-f3a86ff8-2d53-48b5-b67e-c552634e3dd9.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162210-605b54b9-bfa0-4ac5-8918-2ecb84a3655c.png)
+
+![image](https://user-images.githubusercontent.com/87030990/173162272-5ddf0585-09ed-4486-90c5-b6671b24df59.png)
+
+
+
