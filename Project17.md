@@ -1,10 +1,10 @@
 ### AUTOMATE INFRASTRUCTURE WITH IAC USING TERRAFORM. PART 2
 
-Objective: 
+**Objective:** To create a fully automated AWS Infrastructure for 2 websites with Terraform
 
 #### Step 1: Create Network Resources
 
-Having created 2 public subnets, 4 private subnets were then created according to the design
+Having created 2 public subnets in the preceeding project, 4 private subnets were then created according to the design
 
 ````bash
 # Create private subnets
@@ -25,7 +25,6 @@ Creating 4 subnets using in a region with 3 Availability Zones using **Data Sour
 Resolution: **random_shuffle** resource was used to shuffle the availability zones
 
 ![image](https://user-images.githubusercontent.com/87030990/173048977-d93c1077-c32d-4589-b858-e84f432c37a8.png)
-
 
 Running terraform plan gives the output below
 
@@ -85,7 +84,7 @@ Terraform plan gives the output below with NAT-gw, IGW and EIP created
 AWS Route
 A file was created named **route_tables.tf** and used to create routes for both public and private subnets
 
-Private route table was created with all private subnets associated was attached to the NAT Gateway. Public route table was also created with all public subnets associated with it and was attached to the Internet Gateway.
+Private route table was created with all private subnets associated and was attached to the NAT Gateway. Public route table was also created with all public subnets associated with it and was attached to the Internet Gateway.
 
 ![image](https://user-images.githubusercontent.com/87030990/173195989-49765473-d34c-4366-bcc1-b03355ecad59.png)
  
@@ -100,9 +99,10 @@ Main vpc, 2 Public subnets, 4 Private subnets, Internet Gateway, NAT Gateway, EI
 ![image](https://user-images.githubusercontent.com/87030990/173075704-84022ae5-bca4-4279-970d-fb852d5d227c.png)
 ![image](https://user-images.githubusercontent.com/87030990/173075946-5e2b7744-df65-4a0a-9d14-b6b46cd459de.png)
 
-AWS Identity and Access Management
+#### Step 3: AWS Identity and Access Management
 
 IAM roles was created and defined IAM Policy was attached to the role
+
 The IAM role was passed on EC2 instances to give them access to some specific resources
 
 A new file named **role.tf** was created and updated. An Instance Profile was also created and the IAM Role interpolated
@@ -111,7 +111,7 @@ A new file named **role.tf** was created and updated. An Instance Profile was al
 ![image](https://user-images.githubusercontent.com/87030990/173197770-1edc18da-7e3f-43fe-b25e-8c092acc549a.png)
 
 
-### Step 2: Create Security Groups
+### Step 4: Create Security Groups
 
 A single file named **security.tf** was created for security groups (External Load Balancer, Internat Load Balancer, nginx, bastion, webservers and datalayer) and the security group referenced within each resources that needs it. Security group rule was also created for nginx, internal load balancer, webserver and datalayer.
 
@@ -342,7 +342,7 @@ resource "aws_security_group_rule" "inbound-mysql-webserver" {
 ![image](https://user-images.githubusercontent.com/87030990/173116266-062464c8-9fed-4ee8-8c33-4f5734b0934d.png)
 
 
-### Step 3: Register a Domain and configure secured connection using SSL/TLS certificates
+### Step 5: Register a Domain and configure secured connection using SSL/TLS certificates
 
 Create Certificate from Amazon Certificate Manager
 
@@ -414,7 +414,7 @@ resource "aws_route53_record" "wordpress" {
 }
 ````
 
-#### Step 4:Create an external (Internet facing) Application Load Balancer and Internal Application Load Balancer
+#### Step 6:Create an external (Internet facing) Application Load Balancer and Internal Application Load Balancer
 
 A file called **alb.tf** was created and loaded with the code snippets:
 
@@ -432,7 +432,7 @@ N.B: ALB is required to balance the traffic between the Instances.
 ![image](https://user-images.githubusercontent.com/87030990/173116477-61688198-52c0-4fbd-981d-3ce58f8fa464.png)
 
 
-#### Step 5: Create AutoScaling Groups
+#### Step 7: Create AutoScaling Groups
 Auto Scaling Group was created to scale the EC2 Instances out or in depending on the application traffic
 
 **asg-bastion-nginx.tf** was created and the code snippet below pasted:
@@ -445,7 +445,7 @@ SNS-topic and SNS-notification was created for all the AutoScaling Groups
 ![image](https://user-images.githubusercontent.com/87030990/173200539-29540ebc-5062-45ae-94c0-34c8c5a6b19f.png)
 ![image](https://user-images.githubusercontent.com/87030990/173200593-835f87a1-3695-4694-969f-b77df885b36d.png)
 
-#### Step 6: Create Storage and Database
+#### Step 8: Create Storage and Database
 
 Create Elastic File System (EFS)
 In order to create an EFS, a KMS key was created.
@@ -466,12 +466,16 @@ All variables referenced in each of the resources were properly declared in the 
 ![image](https://user-images.githubusercontent.com/87030990/173440038-7b3ddf04-153b-4e03-8260-b1de3828421b.png)
 ![image](https://user-images.githubusercontent.com/87030990/173440387-1eb3477d-f0e0-425a-bd6b-175c8a0ceccc.png)
 
+Error while creating rds subnet group. The 3rd and 4th subnets were shuffled into the same AZ which throws the error below:
 
-
-
-Error while creating rds subnet group. The 3rd and 4th subnets were shuffled into the same AZ
+Error creating DB as private-subnet3 and 4 were shuffled into the same AZ (us-east-2b) as shown below
 ![image](https://user-images.githubusercontent.com/87030990/173157057-99366f11-72d0-4663-b010-87d8de5923b9.png)
+
+Resolution: The infrastructure was destroyed by running terraform destroy and the Count index for Availability Zone of the private subnets was increased  by 1 ([count index + 1]) in order to reshuffle the availability zone.
+
 ![image](https://user-images.githubusercontent.com/87030990/173161956-2a767290-3927-49c6-abb3-70d6ad41f56e.png)
+
+Terraform validate was ran to validate the codes. Terrafor apply was executed after checking the plan with terraform plan
 
 ![image](https://user-images.githubusercontent.com/87030990/173161920-850210a0-26de-4c10-a265-fc8c431fb93d.png)
 
@@ -492,4 +496,4 @@ Create subnet group first
 ![image](https://user-images.githubusercontent.com/87030990/173162272-5ddf0585-09ed-4486-90c5-b6671b24df59.png)
 
 
-
+**Conclusion:** A fully automated AWS Infrastructure for 2 websites was fully created with Terraform
