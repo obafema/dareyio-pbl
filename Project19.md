@@ -1,6 +1,6 @@
 ### AUTOMATE INFRASTRUCTURE WITH IAC USING TERRAFORM. PART 4 – TERRAFORM CLOUD
 
-**Objective:** To migrate the previously written terraform codes for creating AWS Cloud Solution for 2 company websites using a reverse proxy technology to Terraform cloud and managing our AWS Infrastructure from there.
+**Objective:** To migrate the previously written terraform codes for implementing AWS Cloud Solution for 2 company websites using a reverse proxy technology to Terraform cloud and managing our AWS Infrastructure from there.
 
 Tasks
 - Create Amazon Machine Images (AMIs) for our instances using Packer and define our shell scripts to create the required instances inside it.
@@ -13,7 +13,7 @@ Tasks
 
 A repository named Terraform-cloud was created in Gitlab and the previously developed terraform codes pushed into it for connection to the version control workflow
 
-![image](https://user-images.githubusercontent.com/87030990/179385759-65b3e29c-276c-480b-bb11-8d0c89c9d7ef.png)
+![image](https://user-images.githubusercontent.com/87030990/179399764-5a9e3843-ca31-4db5-831b-b68d80be1fa5.png)
 
 **Terraform Cloud account** and an **organisation** were created. Also configured was a **workspace named terraform-cloud** with version control workflow to run Terraform commands triggered from our git repository.
 
@@ -28,6 +28,7 @@ Two environment variables (**AWS_ACCESS_KEY_ID** and **AWS_SECRET_ACCESS_KEY**) 
 **auto.tfvars** was used for the variable default values to make sure that every variable specified in the configuration is automatically uploaded to the workspace on Terraform Cloud instead of loading it manually.
 
 **Automatic speculative plan** was checked to trigger speculative terraform plan for pull requests to the repository
+
 
 #### Step 2: Develop packer files and define our shell script to create our AMIs
 
@@ -55,11 +56,12 @@ Same was done for nginx, webservers and ubuntu(sonar)
 
 ![image](https://user-images.githubusercontent.com/87030990/179388563-12eafb9d-003e-4eef-ac24-d2944f65fa24.png)
 
+
 #### Step 3: Create AWS Resources using terraform
 
 Update the terraform script with the AMI IDs created with packer build
 
-Comment out the listeners from the ALB file and the attachments for webservers in the Autoscaling group files to prevent the Load Balancers from forwarding traffic to the target groups before completing the configuration of the resources to prevent healthcheck failure.
+Comment out the listeners from the ALB file and the attachments for webservers and nginx in the Autoscaling group files to prevent the Load Balancers from forwarding traffic to the target groups before completing the configuration of the resources to prevent healthcheck failure.
 
 N.B: The target groups will not have instances coming from the Autoscaling Group.
 
@@ -78,7 +80,7 @@ Run terraform script to create the resources
 
 Changes to the code was saved, added, committed and pushed to GitLab to trigger creation of resources
 
-The plan failed initially do to error in screenshot below. The name of the module was incorrect (module/security instead of module/Security)
+The plan failed initially due to error in screenshot below. The name of the module was incorrect (module/Security instead of module/security)
 
 ![image](https://user-images.githubusercontent.com/87030990/179390810-c00d432d-b87b-45d8-882d-d5fd8397373b.png)
 
@@ -97,10 +99,15 @@ Changes to the code was saved, added, committed and again pushed to GitLab. Pipe
 
 ![image](https://user-images.githubusercontent.com/87030990/179391735-c256fbda-44b0-488e-944e-52cea378da4c.png)
 
+EC2 instances and Autoscaling Group created on AWS
+
+![image](https://user-images.githubusercontent.com/87030990/179421298-64c6a0df-8a6c-48a3-80ef-a8958c4ff30d.png)
+![image](https://user-images.githubusercontent.com/87030990/179421343-d1d84a40-a32e-46a3-998e-691fad0b014f.png)
+
+
 #### Step 4: Configure AWS Resources using Ansible
 
-Logon to the Bastion server and clone ansible repository from GitLab to the bastion
-Open the folder from Visual Studio Code and cd to the diectory
+Logon to the Bastion server and clone ansible repository from GitLab to the bastion. Open the folder from Visual Studio Code and cd to the ansible directory
 
 ![image](https://user-images.githubusercontent.com/87030990/179392314-0d7c705e-7383-4f87-af56-33433bb90822.png)
 
@@ -169,9 +176,10 @@ ansible-playbook -i inventory/aws-ec2.yml playbooks/site.yml
 ![image](https://user-images.githubusercontent.com/87030990/179395286-88b97cd6-9380-4d74-ae33-a12c51d348ef.png)
 ![image](https://user-images.githubusercontent.com/87030990/179395301-efeadb52-a97d-4fc0-b4b2-f2185256b204.png)
 
+
 #### Step 5: Verify that the resources are properly configured
 
-After configuring our resources, we **ssh** to each of the resources configured using ansible-playbook to confirm that the resources were correctly configured and make neccessary adjustment if need be
+After configuring our resources, we **ssh** to each resource configured to confirm that the resources were correctly configured and make neccessary adjustment if need be
 
 Logon to the bastion server in order to access nginx and the webservers for confirmtion of status and configuration
 
@@ -189,7 +197,7 @@ sudo vi /etc/nginx/nginx.conf ( to confirm that nginx is configured properly)
 
 ![image](https://user-images.githubusercontent.com/87030990/179396260-c236a978-521f-49fd-be3d-9c23e10c4b74.png)
 
-Exit nginx and logon to the tooling from the bastion server, run **ssh ec2-user@<private_ip_address_of_tooling>** to access the nginx
+Exit nginx and logon to the tooling from the bastion server, run **ssh ec2-user@<private_ip_address_of_tooling>** to access the tooling
 
 ````bash
 df -h (to check for successful mounting)
@@ -204,7 +212,7 @@ curl localhost (to confirm locally that the website is running)
 
 ![image](https://user-images.githubusercontent.com/87030990/179396371-88d8d4b3-ea95-4234-a6c2-0fa83b2e7a32.png)
 
-Exit tooling and logon to the wordpress from the bastion server, run **ssh ec2-user@<private_ip_address_of_wordpress>** to access the nginx
+Exit tooling and logon to the wordpress from the bastion server, run **ssh ec2-user@<private_ip_address_of_wordpress>** to access the wordpress
 
 ````bash
 df -h (to check for successful mounting)
@@ -219,12 +227,14 @@ curl -v localhost (to confirm locally that the website is running)
 
 When curl -v localhost was ran, an error with the message below was received.
 
+````bash
 </head>
 <body id="error-page".
       "<div class="wp-die-message"><h1>Error establishing a database connection</h1></div></body> 
 </html=
 * closing connection 0
-                                  
+````
+
 This was corrected by updating the database_name, database_user, database_password and database_host in the **wp-config.php** file in the html directory by running **sudo vi wp-config.php** and then run curl -v localhost again
                                   
 ````bash
@@ -232,7 +242,8 @@ sudo vi wp-config.php
 ````
                                   
 ![image](https://user-images.githubusercontent.com/87030990/179397101-60b34e4f-7ceb-4ed6-9e50-d28a0db310d8.png)
-                               
+
+
 #### Step 6: Uncomment the listeners from the ALB file and the attachments for webservers in the Autoscaling group files 
                  
 ![image](https://user-images.githubusercontent.com/87030990/179397631-0bbfd841-c21d-47e6-acf3-26d6bd77d2b9.png)
@@ -241,7 +252,7 @@ sudo vi wp-config.php
 ![image](https://user-images.githubusercontent.com/87030990/179397709-214155e4-b63a-4522-910b-c8a0226b16af.png)
 ![image](https://user-images.githubusercontent.com/87030990/179397719-696c6e82-0229-41d8-a3ba-135254c9784d.png)
 
-Changes to the code was saved, added, committed and pushed to GitLab to trigger updating of the resources
+Changes to the code was saved, added, committed and pushed to GitLab to trigger modification of the resources
 
 ![image](https://user-images.githubusercontent.com/87030990/179397869-a322ddc7-a826-4bea-afed-78bd902bc31f.png)
 ![image](https://user-images.githubusercontent.com/87030990/179397902-fd48936a-2477-413c-83ee-6d35554394a5.png)
@@ -252,5 +263,6 @@ The Load balancer will start forwarding traffic to the target groups and our web
                                   
 ![image](https://user-images.githubusercontent.com/87030990/179398370-a17e5a5c-54aa-4e34-ba73-f752a40231e2.png)
 ![image](https://user-images.githubusercontent.com/87030990/179398407-695250d4-ecc3-4195-97cd-450b550bb3d4.png)
-                                  
+
+
 **Conclusion:** Terraform code was migrated to Terraform Cloud and the infrastructure successfully provisioned and configured for 2 company websites using a reverse proxy technology                                
