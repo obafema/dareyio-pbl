@@ -15,11 +15,11 @@ A repository named Terraform-cloud was created in Gitlab and the previously deve
 
 ![image](https://user-images.githubusercontent.com/87030990/179385759-65b3e29c-276c-480b-bb11-8d0c89c9d7ef.png)
 
-Terraform Cloud account and an organisation were created. Also configured was a workspace named terraform-cloud with version control workflow to run Terraform commands triggered from our git repository.
+**Terraform Cloud account** and an **organisation** were created. Also configured was a **workspace named terraform-cloud** with version control workflow to run Terraform commands triggered from our git repository.
 
 ![image](https://user-images.githubusercontent.com/87030990/179385493-064cd907-027a-4b0c-a843-d8752c9bc960.png)
 
-Variable was configured
+**Variable** was configured
 
 Two environment variables (**AWS_ACCESS_KEY_ID** and **AWS_SECRET_ACCESS_KEY**) and their values were set to enable Terraform Cloud to apply the codes from our GitLab to create all necessary AWS resources (infrastructure) using Terraform Cloud.
 
@@ -27,20 +27,20 @@ Two environment variables (**AWS_ACCESS_KEY_ID** and **AWS_SECRET_ACCESS_KEY**) 
 
 **auto.tfvars** was used for the variable default values to make sure that every variable specified in the configuration is automatically uploaded to the workspace on Terraform Cloud instead of loading it manually.
 
-Automatic speculative plan was checked to trigger speculative terraform plan for pull requests to the repository
+**Automatic speculative plan** was checked to trigger speculative terraform plan for pull requests to the repository
 
 #### Step 2: Develop packer files and define our shell script to create our AMIs
 
 N.B: The shell scripts tells packer what needs to be picked inside the AMIs we are creating
 
-Packer files (.pkr.hcl) for Bastion, nginx, webservers and ubuntu (sonarqube,jenkins and artifactory) and the respective shell script developed. See screenshot below for Bastion for the creation of our AMIs.
+**Packer files (.pkr.hcl)** for Bastion, nginx, webservers and ubuntu (sonarqube,jenkins and artifactory) and the respective shell script developed. See screenshot below for Bastion for the creation of our AMIs.
 
 ![image](https://user-images.githubusercontent.com/87030990/179386991-b2ec781f-7a14-4270-8ebf-cb64c20a89d2.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/179386537-358f5cad-1a64-4067-bb0f-41ce844e1ac5.png)
 ![image](https://user-images.githubusercontent.com/87030990/179386767-22fba560-9a52-440f-9ad6-c8eba8834ac6.png)
 
-Packer was installed on my loal machine in order to run packer commands
+Packer was installed on my local machine in order to run packer commands
 
 ![image](https://user-images.githubusercontent.com/87030990/179388303-466fe58e-c225-49a6-b536-f7079aa57858.png)
 
@@ -116,7 +116,7 @@ aws s3 ls
 ![image](https://user-images.githubusercontent.com/87030990/179394365-b595aae4-0aaf-481e-a0fd-0a42c4f20264.png)
 
 
-Ansible-inventory -i inventory/aws_ec2.yml --list to verify that Ansible can use the inventory which failed because plugin for ec2 dynamic inventory was not present
+**ansible-inventory -i inventory/aws_ec2.yml --list** to verify that Ansible can use the inventory which failed because plugin for ec2 dynamic inventory was not present
 
 ![image](https://user-images.githubusercontent.com/87030990/179392869-481d5b80-b244-4916-bc59-2908771ae8c0.png)
 
@@ -128,22 +128,24 @@ sudo python3.8 -m pip install boto3 botocore
 ![image](https://user-images.githubusercontent.com/87030990/179394389-5ca7fc96-2c05-4db9-8967-2993957ef40b.png)
 
 
-ansible-inventory -i inventory/aws_ec2.yml --graph was ran and it was verified that ansible can pull the IP address of our instances as shown below
+**ansible-inventory -i inventory/aws_ec2.yml --graph** was ran and it was verified that ansible can pull the IP address of our instances as shown below
 
 ![image](https://user-images.githubusercontent.com/87030990/179394436-c0623d59-4860-4268-9fa6-01a0b9559a6d.png)
 
-RDS endpoint for tooling and wordpress was updated
+**RDS endpoint** for tooling and wordpress was updated
+
 ![image](https://user-images.githubusercontent.com/87030990/179394678-1e407c1c-3acb-4006-a19a-484bca814642.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/179394744-542c5154-a017-4412-9d3c-1fb688a65792.png)
 
-Access point ID for wordpress and tooling was updated
+**Access point ID **for wordpress and tooling was updated
+
 ![image](https://user-images.githubusercontent.com/87030990/179394715-59f43b6f-64e4-44a0-912b-6ed5412b2b9c.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/179394764-d62bfa66-e4b5-401b-a2e2-0dc121fa10fb.png)
 
 
-Internal load balancer DNS for nginx reverse proxy also updated
+**Internal load balancer DNS** for nginx reverse proxy also updated
 
 ![image](https://user-images.githubusercontent.com/87030990/179394514-12cf5fcd-77fd-4b2b-beb4-0ff7498ac92f.png)
 
@@ -243,6 +245,12 @@ Changes to the code was saved, added, committed and pushed to GitLab to trigger 
 
 ![image](https://user-images.githubusercontent.com/87030990/179397869-a322ddc7-a826-4bea-afed-78bd902bc31f.png)
 ![image](https://user-images.githubusercontent.com/87030990/179397902-fd48936a-2477-413c-83ee-6d35554394a5.png)
-
-
+![image](https://user-images.githubusercontent.com/87030990/179398279-5311755a-5eda-4227-91f7-afaaec42193f.png)
+![image](https://user-images.githubusercontent.com/87030990/179398343-657007a9-34a3-4474-bfce-49e695f276bc.png)
                                   
+The Load balancer will start forwarding traffic to the target groups and our websites will be available.
+                                  
+![image](https://user-images.githubusercontent.com/87030990/179398370-a17e5a5c-54aa-4e34-ba73-f752a40231e2.png)
+![image](https://user-images.githubusercontent.com/87030990/179398407-695250d4-ecc3-4195-97cd-450b550bb3d4.png)
+                                  
+**Conclusion:** Terraform code was migrated to Terraform Cloud and the infrastructure successfully provisioned and configured for 2 company websites using a reverse proxy technology                                
