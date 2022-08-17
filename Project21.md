@@ -12,7 +12,8 @@ The following Client tools were installed before bootstrapping the Cluster
 * **cfssljson** – A program, which takes the JSON output from the cfssl and writes **certificates**, **keys**, **CSRs**, and bundles to disk.
 
 
-* Install and configure AWS CLI
+
+#### Install and configure AWS CLI
 
 A user with programmable access was configure on AWS Identity and Access Management (IAM) for access to all AWS services used
 
@@ -31,7 +32,7 @@ AWS CLI was tested for proper configuration was by running: ````aws ec2 describe
 ![image](https://user-images.githubusercontent.com/87030990/183634120-4f6cefb6-3356-4221-99c8-d065eadb057a.png)
 
 
-* Install kubectl on Local System
+#### Install kubectl on Local System
 
 Kubectl version (1.24.2) included in earlier installed Docker Desktop installation was used for this project
 
@@ -48,7 +49,7 @@ Moving the file to the Bin directory: ````$ sudo mv kubectl /usr/local/bin/````
 Verifying that kubectl version 1.21.0 or higher is installed: ````$ kubectl version --client````
 
 
-* Install CFSSL and CFSSLJSON
+#### Install CFSSL and CFSSLJSON
 
 **cfssl** was configured as a **Certificate Authority** which will issue the certificates required to spin up the Kubernetes cluster.
 
@@ -2063,7 +2064,7 @@ EOF
   sudo systemctl enable containerd kubelet kube-proxy
   sudo systemctl start containerd kubelet kube-proxy
 }
- ```` Kubernetes cluster From-Ground-Up
+ ````
  
  ![image](https://user-images.githubusercontent.com/87030990/185012629-84003d35-311a-4016-9b59-e2c0efbf863a.png)
 
