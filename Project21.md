@@ -1,6 +1,6 @@
 # ORCHESTRATING CONTAINERS ACROSS MULTIPLE VIRTUAL SERVERS WITH KUBERNETES. PART 1
 
-**Objective: ** 
+**Objective: ** To setup Kubernetes cluster manually from the scratch without any automation for better understanding of stages involve in setting up a cluster and how they are interconnected.
 
 **Prerequisites:**
 Install Client tools before bootstrapping the Cluster
@@ -18,8 +18,8 @@ Latest version of AWS CLI was downloaded, installed and configured using aws con
 
 ````bash
  aws configure --profile %your_username%
-AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS Access Key ID [None]: <Access_Key_ID>
+AWS Secret Access Key [None]: <secret_key>
 Default region name [None]: us-west-2
 Default output format [None]: json
 ````
@@ -1911,4 +1911,4 @@ EOF
 
  Checking the readiness of the worker nodes on all master nodes:$ kubectl get nodes --kubeconfig admin.kubeconfig -o wide
  
- ![image](https://user-images.githubusercontent.com/87030990/185015200-0dacf04a-7ae6-449c-956e-557427e155ee.png)
+![image](https://user-images.githubusercontent.com/87030990/185015505-ea648881-5ff7-4cd6-9b83-1c95a80938c9.png)
