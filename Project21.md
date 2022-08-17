@@ -1505,7 +1505,410 @@ EOF
 PREV
  ````
  
- 
  ![image](https://user-images.githubusercontent.com/87030990/185001930-17a4a3a6-8ba1-44e6-b200-104ee5e537ef.png)
 
+ We need to configure Role Based Access (RBAC) for Kubelet Authorization:
+
+Configure RBAC permissions to allow the Kubernetes API Server to access the Kubelet API on each worker node. Access to the Kubelet API is required for retrieving metrics, logs, and executing commands in pods.
  
+Create the system:kube-apiserver-to-kubelet ClusterRole with permissions to access the Kubelet API and perform most common tasks associated with managing pods on the worker nodes:
+
+Run the below script on the Controller node:
+
+ ````bash
+ cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-apiserver-to-kubelet
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/proxy
+      - nodes/stats
+      - nodes/log
+      - nodes/spec
+      - nodes/metrics
+    verbs:
+      - "*"
+EOF
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185002765-87c8a66f-b730-40ce-a241-c1a047dc8657.png)
+
+ Bind the system:kube-apiserver-to-kubelet ClusterRole to the kubernetes user so that API server can authenticate successfully to the kubelets on the worker nodes:
+ 
+ ````bash
+ cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kubernetes
+EOF
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185002875-bfe575c9-fb21-47e7-9a05-332482144cfa.png)
+
+ 
+ Bootstraping components on the worker nodes
+The following components will be installed on each node:
+
+kubelet
+kube-proxy
+Containerd or Docker
+Networking plugins
+
+ SSH into the worker nodes and install OS depemdences
+  
+ ![image](https://user-images.githubusercontent.com/87030990/185003497-5db7d79a-7edb-4d33-9aee-f6639be40488.png)
+ 
+ Disable Swap
+If swap) is not disabled, kubelet will not start. It is highly recommended to allow Kubernetes to handle resource allocation.
+
+Test if swap is already enabled on the host:
+
+ ````bash
+sudo swapon --show
+````
+ Disable swap by running
+ 
+ ````bash
+ sudo swapoff -a
+ ````
+ 
+ Download and install a container runtime. (Containerd was preferred to Docker as Docker is now deprecated, and Kubernetes no longer supports the Dockershim codebase from v1.20 release)
+ 
+ Download binaries for runc, cri-ctl, and containerd
+
+````bash
+ wget https://github.com/opencontainers/runc/releases/download/v1.0.0-rc93/runc.amd64 \
+  https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz \
+  https://github.com/containerd/containerd/releases/download/v1.4.4/containerd-1.4.4-linux-amd64.tar.gz 
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185004741-30e96471-d0ec-47bb-b072-c0b1171036bf.png)
+
+ Configure containerd:
+ 
+ ````bash
+ {
+  mkdir containerd
+  tar -xvf crictl-v1.21.0-linux-amd64.tar.gz
+  tar -xvf containerd-1.4.4-linux-amd64.tar.gz -C containerd
+  sudo mv runc.amd64 runc
+  chmod +x  crictl runc  
+  sudo mv crictl runc /usr/local/bin/
+  sudo mv containerd/bin/* /bin/
+}
+ ````
+ ````bash
+ sudo mkdir -p /etc/containerd/
+````
+ 
+![image](https://user-images.githubusercontent.com/87030990/185005046-3dc95548-0c36-4384-bc07-ec9b66fddc40.png)
+
+ Inserting the following code snippets in it
+ 
+ ````bash
+ cat << EOF | sudo tee /etc/containerd/config.toml
+[plugins]
+  [plugins.cri.containerd]
+    snapshotter = "overlayfs"
+    [plugins.cri.containerd.default_runtime]
+      runtime_type = "io.containerd.runtime.v1.linux"
+      runtime_engine = "/usr/local/bin/runc"
+      runtime_root = ""
+EOF
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185005347-dfb30c1d-878d-4b48-989b-9b2c1ee4975e.png)
+
+ Create the containerd.service systemd unit file:
+
+ ````bash
+cat <<EOF | sudo tee /etc/systemd/system/containerd.service
+[Unit]
+Description=containerd container runtime
+Documentation=https://containerd.io
+After=network.target
+
+[Service]
+ExecStartPre=/sbin/modprobe overlay
+ExecStart=/bin/containerd
+Restart=always
+RestartSec=5
+Delegate=yes
+KillMode=process
+OOMScoreAdjust=-999
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185005518-7e258bfc-44ed-4dbc-9e7b-dcf3064e014b.png)
+
+ Create directories for to configure kubelet, kube-proxy, cni, and a directory to keep the kubernetes root ca file:
+ 
+ ````bash
+sudo mkdir -p \
+  /var/lib/kubelet \
+  /var/lib/kube-proxy \
+  /etc/cni/net.d \
+  /opt/cni/bin \
+  /var/lib/kubernetes \
+  /var/run/kubernetes
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185005681-8bd0948d-46e7-4f93-b262-1264e96cf86c.png)
+
+ Downloading Container Network Interface(CNI) plugins available from container networking’s GitHub repo:
+ 
+ ````bash
+ wget -q --show-progress --https-only --timestamping \
+  https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+ ````
+ 
+ Install CNI into /opt/cni/bin/
+ 
+ ````bash
+ sudo tar -xvf cni-plugins-linux-amd64-v0.9.1.tgz -C /opt/cni/bin/
+ ````
+ 
+  ![image](https://user-images.githubusercontent.com/87030990/185006066-7ee6d544-c874-46d2-836b-f9dc70ca26eb.png)
+
+ Download binaries for kubectl, kube-proxy, and kubelet
+ 
+ ````bash
+ wget -q --show-progress --https-only --timestamping \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-proxy \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
+ ````
+ 
+ Install the downloaded binaries
+ 
+ ````bash
+{
+  chmod +x  kubectl kube-proxy kubelet  
+  sudo mv  kubectl kube-proxy kubelet /usr/local/bin/
+}
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185006506-7aa4d937-5135-4043-8e0d-7a1fd02ca094.png)
+
+ ````bash
+ wget -q --show-progress --https-only --timestamping \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-proxy \
+  https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
+ ````
+ 
+ Install the downloaded binaries
+{
+  chmod +x  kubectl kube-proxy kubelet  
+  sudo mv  kubectl kube-proxy kubelet /usr/local/bin/
+}
+ 
+ Configure kubelet:
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185007807-e0d72230-9456-4358-a905-2869b34cbee5.png)
+
+ Configuring the network
+
+Get the POD_CIDR that will be used as part of network configuration
+
+ ````bash
+POD_CIDR=$(curl -s http://169.254.169.254/latest/user-data/ \
+  | tr "|" "\n" | grep "^pod-cidr" | cut -d"=" -f2)
+echo "${POD_CIDR}"
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185008147-ce064e84-34aa-4a87-9087-642da1d08b22.png)
+
+ Configure the bridge and loopback networks
+Bridge:
+ 
+ ````bash
+ cat > 172-20-bridge.conf <<EOF
+{
+    "cniVersion": "0.3.1",
+    "name": "bridge",
+    "type": "bridge",
+    "bridge": "cnio0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [{"subnet": "${POD_CIDR}"}]
+        ],
+        "routes": [{"dst": "0.0.0.0/0"}]
+    }
+}
+EOF
+ ````
+ 
+ Loopback:
+
+ ````bash
+cat > 99-loopback.conf <<EOF
+{
+    "cniVersion": "0.3.1",
+    "type": "loopback"
+}
+EOF
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185009097-8811081e-0fe1-4e8a-bd40-532e65605947.png)
+
+ 
+ Move the files to the network configuration directory:
+ 
+ ````bash
+sudo mv 172-20-bridge.conf 99-loopback.conf /etc/cni/net.d/
+ ````
+ 
+ Store the worker’s name in a variable:
+ 
+ ````bash
+ NAME=k8s-cluster-from-ground-up
+WORKER_NAME=${NAME}-$(curl -s http://169.254.169.254/latest/user-data/ \
+  | tr "|" "\n" | grep "^name" | cut -d"=" -f2)
+echo "${WORKER_NAME}"
+ ````
+ 
+ Move the certificates and kubeconfig file to their respective configuration directories:
+ 
+ ````bash
+sudo mv ${WORKER_NAME}-key.pem ${WORKER_NAME}.pem /var/lib/kubelet/
+sudo mv ${WORKER_NAME}.kubeconfig /var/lib/kubelet/kubeconfig
+sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+sudo mv ca.pem /var/lib/kubernetes/
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185009643-a6d1cf69-9193-422e-8bd3-063021042aee.png)
+
+ Create the kubelet-config.yaml file
+Ensure the needed variables exist:
+
+````bash
+NAME=k8s-cluster-from-ground-up
+WORKER_NAME=${NAME}-$(curl -s http://169.254.169.254/latest/user-data/ \
+  | tr "|" "\n" | grep "^name" | cut -d"=" -f2)
+echo "${WORKER_NAME}"
+ ````
+ ````bash
+ cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta2
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    enabled: true
+  x509:
+    clientCAFile: "/var/lib/kubernetes/ca.pem"
+authorization:
+  mode: Webhook
+clusterDomain: "cluster.local"
+clusterDNS:
+  - "10.32.0.10"
+resolvConf: "/etc/resolv.conf"
+runtimeRequestTimeout: "15m"
+tlsCertFile: "/var/lib/kubelet/${WORKER_NAME}.pem"
+tlsPrivateKeyFile: "/var/lib/kubelet/${WORKER_NAME}-key.pem"
+EOF
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185010056-6d878617-259d-40a2-800c-0bfc4ffefc9f.png)
+ 
+ Configure the kubelet systemd service
+ 
+ ````bash
+cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+After=containerd.service
+Requires=containerd.service
+[Service]
+ExecStart=/usr/local/bin/kubelet \\
+  --config=/var/lib/kubelet/kubelet-config.yaml \\
+  --cluster-domain=cluster.local \\
+  --container-runtime=remote \\
+  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \\
+  --image-pull-progress-deadline=2m \\
+  --kubeconfig=/var/lib/kubelet/kubeconfig \\
+  --network-plugin=cni \\
+  --register-node=true \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+EOF
+````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185010580-a9127c84-9b2c-4eec-9cbf-bbda32e3601f.png)
+
+ Create the kube-proxy.yaml file
+
+ ````bash
+ cat <<EOF | sudo tee /var/lib/kube-proxy/kube-proxy-config.yaml
+kind: KubeProxyConfiguration
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+clientConnection:
+  kubeconfig: "/var/lib/kube-proxy/kubeconfig"
+mode: "iptables"
+clusterCIDR: "172.31.0.0/16"
+EOF
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185011168-eccadcef-1d4f-41f1-8f8c-6f5f1e67ced3.png)
+
+ Configure the Kube Proxy systemd service
+ 
+ ````bash
+cat <<EOF | sudo tee /etc/systemd/system/kube-proxy.service
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/kubernetes/kubernetes
+[Service]
+ExecStart=/usr/local/bin/kube-proxy \\
+  --config=/var/lib/kube-proxy/kube-proxy-config.yaml
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+EOF
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/185012444-07139d66-8614-44a5-b9ce-69dc512071e6.png)
+
+ Reload configurations and start both services
+ 
+ ````bash
+{
+  sudo systemctl daemon-reload
+  sudo systemctl enable containerd kubelet kube-proxy
+  sudo systemctl start containerd kubelet kube-proxy
+}
+ ````
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185012629-84003d35-311a-4016-9b59-e2c0efbf863a.png)
+
+ Checking the readiness of the worker nodes on all master nodes:$ kubectl get nodes --kubeconfig admin.kubeconfig -o wide
+ 
+ ![image](https://user-images.githubusercontent.com/87030990/185015200-0dacf04a-7ae6-449c-956e-557427e155ee.png)
