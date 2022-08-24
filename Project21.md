@@ -1555,7 +1555,7 @@ kubectl get componentstatuses --kubeconfig admin.kubeconfig
  ![image](https://user-images.githubusercontent.com/87030990/185000626-b2e74f41-bfee-474e-a2d9-63efc6ef542e.png)
 
 
-**Reason:** The VolumeSnapshot **v1beta1 CRD** has been removed has been removed in Kubernetes v1.24.
+**Reason:** The VolumeSnapshot **v1beta1 CRD** has been removed in Kubernetes v1.24.
  
  **Resolution:** The apiVersion in the **kube-scheduler.yaml** was changed from **kubescheduler.config.k8s.io/v1beta1** to **kubescheduler.config.k8s.io/v1beta2**
  after carrying out further troubleshooting using ````journalctl -xe | grep scheduler.service```` and checking the internet for possible solution to the error.
