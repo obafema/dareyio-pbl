@@ -253,3 +253,134 @@ Note: There is another method – ‘ad-hoc’, it is definitely not the best pr
 kubectl edit -f rs.yaml
 ````
 
+#### Step 5: Creating Deployment
+
+A Deployment is another layer above ReplicaSets and Pods, It manages the deployment of ReplicaSets and allows for easy updating of a ReplicaSet as well as the ability to roll back to a previous version of deployment. It is declarative and can be used for rolling updates of micro-services, ensuring there is no downtime.
+
+Steps to creating Deployment
+
+The ReplicaSet that was created earlier were deleted: ````$ kubectl delete rs nginx-rs````
+
+Deployment manifest file called **deployment.yaml** was developed and subsequently applied using:````$ kubectl apply -f deployment.yaml````
+
+Deployment.yaml manifest
+
+````
+
+* Inspecting the setup:
+
+````
+$ kubectl get po
+
+$ kubectl get deploy
+
+$ kubectl get rs
+````
+![image](https://user-images.githubusercontent.com/87030990/188970318-a96b1093-f36e-4907-a3ba-49d05e49a72e.png)
+
+* Replicas in the Deployment was scaled up to 15 Pods:
+
+![image](https://user-images.githubusercontent.com/87030990/188971264-41c023fa-f5d4-4b20-937a-cdafcb1191fd.png)
+
+* To exec into one of the pods:````kubectl exec nginx-deployment-6fdcffd8fc-x57f9 -i -t bash````
+
+* List the files and folders in the Nginx directory
+
+![image](https://user-images.githubusercontent.com/87030990/188973352-fc1a8535-dd27-44a6-8816-fcb86d102b06.png)
+
+* Check the content of the default Nginx configuration file
+
+![image](https://user-images.githubusercontent.com/87030990/188973834-a4ec3e1f-059f-4674-bd05-099f8330556d.png)
+
+#### Step 6: Persisting Data for PODS
+
+N.B: Deployments are stateless by design. Hence, any data stored inside the Pod’s container does not persist when the Pod dies. If you were to update the content of the **index.html** file inside the container, and the Pod dies, that content will not be lost since a new Pod will replace the dead one.
+
+* Scale the Pods down to 1 replica
+
+* Exec into the running container and install vim to be able to edit the index.html file
+
+![image](https://user-images.githubusercontent.com/87030990/188976492-00ffaa08-2317-4f7c-8aa2-14967255e689.png)
+
+
+Step 7: Deploying Tooling Application With Kubernetes
+
+The tooling application that was containerised with Docker on Project 20, the following shows how the image is pulled and deployed as pods in Kubernetes:
+
+Creating deployment manifest file for the tooling aplication called **tooling-deploy.yaml** and applying it:
+
+````
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tooling-deployment
+  labels:
+    app: tooling-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tooling-app
+  template:
+    metadata:
+      labels:
+        app: tooling-app
+    spec:
+      containers:
+      - name: tooling
+        image: somex6/tooling:0.0.1
+        ports:
+        - containerPort: 80
+   ````
+   
+   Creating Service manifest file for the tooling aplication called tooling-service.yaml and applying it
+   
+ ````
+ apiVersion: v1
+kind: Service
+metadata:
+  name: tooling-service
+spec:
+  selector:
+    app: tooling-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+ ````
+ 
+ 
+* Creating deployment manifest file for the MySQL database application called mysql-deploy.yaml and applying it
+
+````
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: mysql-deployment
+ labels:
+   tier: mysql-db
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     tier: mysql-db
+ template:
+   metadata:
+     labels:
+       tier: mysql-db
+   spec:
+     containers:
+     - name: mysql
+       image: mysql:5.7
+       env:
+       - name: MYSQL_DATABASE
+         value: toolingdb
+       - name: MYSQL_USER
+         value: obafema
+       - name: MYSQL_PASSWORD
+         value: password123
+       - name: MYSQL_ROOT_PASSWORD
+         value: password1234
+       ports:
+       - containerPort: 3306
+````
