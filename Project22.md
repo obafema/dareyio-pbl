@@ -1,6 +1,8 @@
 ### Deploying Applications Into Kubernetes Cluster
 
+
 **Objective:** To deploy containerised applications as pods in Kubernetes and access the application from the browser.
+
 
 #### Step 1: Provisioing of the Infrastructure for the deployment using Terraform
 
@@ -13,22 +15,28 @@ The following nodes were verified to be created using terraform:
 
 ![image](https://user-images.githubusercontent.com/87030990/188835034-c1872b5a-52bd-4873-8d9b-c5cfd53fca81.png)
 
+
+
 ### Step 2: Creating A Pod For The Nginx Application
 
 A director named **k8s** was created and cd into
 
-A namespace named **obafema** was created for testing the deployment before deployment in dev environment:
+
+A namespace named **obafema** was created for implementation and testing:
 
 ![image](https://user-images.githubusercontent.com/87030990/188836083-51e609cf-c81f-4744-80f4-3c5ccd592228.png)
 
 Nodes created in the eks cluster was confirmed as shown below:
+
 ![image](https://user-images.githubusercontent.com/87030990/188836313-af89685a-8dd6-4d21-b4fd-522b63968052.png)
 
-* Manisfest to create a Pod for nginx Application named **nginx-pod.yaml** was written and the pod subsequently created withing **obafema namespace** using:
+
+* Manisfest named **nginx-pod.yaml** to create a Pod for nginx application was developed and pod was subsequently created within **obafema namespace** using:
 
 ````kubectl apply -f nginx-pod.yaml````
 
-nginx-pod.yaml manifest file
+
+**nginx-pod.yaml** manifest file
 
 ![image](https://user-images.githubusercontent.com/87030990/188837396-9124df40-7201-4537-a21e-8fedc46f2ec9.png)
 
@@ -46,6 +54,7 @@ $ kubectl describe pod nginx-pod
 ![image](https://user-images.githubusercontent.com/87030990/188840275-17445eb1-fd97-42f4-9d00-b16a938d76a5.png)
 
 
+
 #### Step 3: Accessing the Nginx Application within the Kubernetes Cluster and also through a Browser
 
 The Nginx Pod was accessed through its IP address from within the Kubernetes cluster using an image that already has curl software installed.
@@ -60,7 +69,7 @@ curl command pointing it to the IP address of the Nginx Pod was ran: ````$ curl 
 
 * To access the application through the browser, a service was created for the pod.
 
-An nginx-service.yaml manifest file was created
+An **nginx-service.yaml** manifest file was created
 
 ````
 apiVersion: v1
@@ -91,7 +100,7 @@ $ kubectl get svc nginx-service -o wide
 ![image](https://user-images.githubusercontent.com/87030990/188863299-1c51e8f0-cc6c-4936-a2b8-f56c7a02e328.png)
 
 
-* The type of service created for the Nginx pod is a ClusterIP which cannot be accessed externally. Port-forwarding was done in order to map the machine's(my laptop) port to the ClusterIP service port i.e, tunnelling traffic through the machine's port number to the port number of the nginx-service: ````$ kubectl port-forward svc/nginx-service 8089:80````
+* The type of service created for the Nginx pod is a **ClusterIP** which cannot be accessed externally. Port-forwarding was done in order to map the machine's(my laptop) port to the ClusterIP service port i.e, tunnelling traffic through the machine's port number to the port number of the nginx-service: ````$ kubectl port-forward svc/nginx-service 8089:80````
 
 ![image](https://user-images.githubusercontent.com/87030990/188865117-6f858f21-2efb-4169-9152-658ec700e2c3.png)
 
@@ -107,7 +116,7 @@ $ kubectl get svc nginx-service -o wide
 
 * Another way of accessing the Nginx app through browser is the use of **NodePort** which is a type of service that exposes the service on a static port on the node’s IP address and they range from 30000-32767 by default.
 
-Note: Here, you can only access the application on the **worker node** the pod is running on.
+Note: Here, you can only access the application with the IP address of the **worker node** the pod is running on.
 
 * The **nginx-service.yml** manifest file was edited to expose the Nginx service in order to be accessible to the browser by adding NodePort as a type of service:
 
@@ -130,14 +139,14 @@ spec:
 
 ![image](https://user-images.githubusercontent.com/87030990/188868791-3d8a0877-b109-4294-867a-b8ab4ce9e997.png)
 
-
 Effort to access the application through the Public IP address of the worker node was not successful.
 
 **Error message:** Site could not be reached. 3.23.23.173 took too long to respond.
 
 ![image](https://user-images.githubusercontent.com/87030990/188895217-53794e33-48a7-41f5-9d6a-622cd9158316.png)
 
-Another cofiguration with LoadBalancer as the type of node:
+
+* Another cofiguration with LoadBalancer as the type of node:
 
 ````
 apiVersion: v1
@@ -165,13 +174,15 @@ spec:
 
 N.B: LoadBalancer type is too expensive to maintain. If you have 100 services, it is not cost-effective to have LoadBalancer for each of them. The best solution to use is the Cluster IP type with an ingress infront of it which is likely to be a LoadBalancer which will be used across all the services .running in the cluster
 
+
+
 #### Step 4: Creating A Replica Set
 
 ReplicaSet ensures desired number of Pods is always running to achieve availability in case one or two pods dies (e.g error, Node reboot or some other reason).
 
-Deleting the nginx-pod:````kubectl delete pod nginx-pod````
+* Deleting the nginx-pod:````kubectl delete pod nginx-pod````
 
-Creating the replicaSet manifest file and applying it:````$ kubectl apply -f rs.yaml````
+* Creating the replicaSet manifest file and applying it:````$ kubectl apply -f rs.yaml````
 
 ````
 #Part 1 (actual replicaset creation)
@@ -250,6 +261,8 @@ Note: There is another method – ‘ad-hoc’, it is definitely not the best pr
 kubectl edit -f rs.yaml
 ````
 
+
+
 #### Step 5: Creating Deployment
 
 A Deployment is another layer above ReplicaSets and Pods, It manages the deployment of ReplicaSets and allows for easy updating of a ReplicaSet as well as the ability to roll back to a previous version of deployment. It is declarative and can be used for rolling updates of micro-services, ensuring there is no downtime.
@@ -288,6 +301,8 @@ $ kubectl get rs
 * Check the content of the default Nginx configuration file
 
 ![image](https://user-images.githubusercontent.com/87030990/188973834-a4ec3e1f-059f-4674-bd05-099f8330556d.png)
+
+
 
 
 #### Step 6: Deploying Tooling Application With Kubernetes
@@ -416,6 +431,10 @@ Resolution: Environment variable for the database properly defined in the** mysq
 
 ![image](https://user-images.githubusercontent.com/87030990/189217345-b608839c-7d62-450b-906c-8ec30e6216ed.png)
 
-* The tooling_app was then successfully accessed through the browser: localhost:5000
+
+* The tooling_app was then successfully accessed from the browser using: ````http://localhost:5000````
 
 ![image](https://user-images.githubusercontent.com/87030990/189210805-419f835b-21b0-44f9-8ecc-830fe15009b9.png)
+
+
+**Conclusion:** Tooling app was successfully deployed in Kubernetes and was accessed through the browser.
