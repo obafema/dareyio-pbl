@@ -60,7 +60,7 @@ curl command pointing it to the IP address of the Nginx Pod was ran: ````$ curl 
 
 * To access the application through the browser, a service was created for the pod.
 
-An nginx-service.yaml nanifest file was created
+An nginx-service.yaml manifest file was created
 
 ````
 apiVersion: v1
@@ -75,9 +75,6 @@ spec:
     port: 80
     targetPort: 80
 ````
-
-![image](https://user-images.githubusercontent.com/87030990/188843055-b7edd264-8065-4ec2-9671-02e46af49588.png)
-
 
 The service for the nginx pod was then created by applying the manifest file:````$ kubectl apply -f nginx-service.yaml````
 
@@ -103,7 +100,7 @@ $ kubectl get svc nginx-service -o wide
 ![image](https://user-images.githubusercontent.com/87030990/188865397-7bdfad02-6212-48a2-8d64-e8ee47f54d48.png)
 
 
-* To check logs on the pods, do ````kubectl logs nginx-pod```. To keep the logs yupdating do ````kubectl logs nginx-pod -n obafema --follow````
+* To check logs on the pods, do ````kubectl logs nginx-pod```. To keep the logs updating do ````kubectl logs nginx-pod -n obafema --follow````
 
 ![image](https://user-images.githubusercontent.com/87030990/188867982-eeaf0e32-c60d-471a-8627-5389aae36008.png)
 
@@ -222,13 +219,13 @@ Note: ReplicaSet understands which Pods to create by using SELECTOR key-value pa
 
 * Scale ReplicaSet up and down:
 
-There are two approaches of Kubernetes Object Management (scaling pods up or down): imperative and declarative: Imperative and Declarative
+There are two approaches of Kubernetes Object Management (scaling pods up or down): Imperative and Declarative
 
-**Imperative method** is by running a command on the CLI: ````$ kubectl scale --replicas 5 replicaset nginx-rs```` to scale up
+**Imperative method** is by running a command on the CLI: ````$ kubectl scale --replicas 5 replicaset nginx-rs```` to scale up or down
 
 ![image](https://user-images.githubusercontent.com/87030990/188942704-add86d56-4405-40a2-8bc5-552757fa9362.png)
 
-* Scaling down will work the same way, so scale it down from 5 to 3 replicas for example using ````$ kubectl scale --replicas 3 replicaset nginx-rs````
+* Scaling down will work the same way, to scale it down from 5 to 3 replicas for example using ````$ kubectl scale --replicas 3 replicaset nginx-rs````
 
 ![image](https://user-images.githubusercontent.com/87030990/188943557-3254227e-9ce5-4622-804e-b0951e75312f.png)
 
@@ -265,7 +262,6 @@ Deployment manifest file called **deployment.yaml** was developed and subsequent
 
 Deployment.yaml manifest
 
-````
 
 * Inspecting the setup:
 
@@ -276,6 +272,7 @@ $ kubectl get deploy
 
 $ kubectl get rs
 ````
+
 ![image](https://user-images.githubusercontent.com/87030990/188970318-a96b1093-f36e-4907-a3ba-49d05e49a72e.png)
 
 * Replicas in the Deployment was scaled up to 15 Pods:
@@ -292,22 +289,12 @@ $ kubectl get rs
 
 ![image](https://user-images.githubusercontent.com/87030990/188973834-a4ec3e1f-059f-4674-bd05-099f8330556d.png)
 
-#### Step 6: Persisting Data for PODS
 
-N.B: Deployments are stateless by design. Hence, any data stored inside the Pod’s container does not persist when the Pod dies. If you were to update the content of the **index.html** file inside the container, and the Pod dies, that content will not be lost since a new Pod will replace the dead one.
-
-* Scale the Pods down to 1 replica
-
-* Exec into the running container and install vim to be able to edit the index.html file
-
-![image](https://user-images.githubusercontent.com/87030990/188976492-00ffaa08-2317-4f7c-8aa2-14967255e689.png)
-
-
-Step 7: Deploying Tooling Application With Kubernetes
+#### Step 6: Deploying Tooling Application With Kubernetes
 
 The tooling application that was containerised with Docker on Project 20, the following shows how the image is pulled and deployed as pods in Kubernetes:
 
-Creating deployment manifest file for the tooling aplication called **tooling-deploy.yaml** and applying it:
+* Creating deployment manifest file for the tooling aplication called **tooling-deploy.yaml** and applying it:
 
 ````
 apiVersion: apps/v1
@@ -328,25 +315,34 @@ spec:
     spec:
       containers:
       - name: tooling
-        image: somex6/tooling:0.0.1
+        image: obafema/tooling_app:0.0.1
+        env:
+        - name: MYSQL_IP
+          value: mysqlserverhost
+        - name: MYSQL_DATABASE
+          value: toolingdb
+        - name: MYSQL_USER
+          value: userconnect
+        - name: MYSQL_PASSWORD
+          value: zigali
         ports:
         - containerPort: 80
    ````
    
-   Creating Service manifest file for the tooling aplication called tooling-service.yaml and applying it
+* Creating Service manifest file for the tooling aplication called tooling-service.yaml and applying it
    
  ````
- apiVersion: v1
+apiVersion: v1
 kind: Service
 metadata:
-  name: tooling-service
+ name: tooling-service
 spec:
-  selector:
-    app: tooling-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+ selector:
+   app: tooling-app
+ ports:
+   - protocol: TCP
+     port: 80
+     targetPort: 80
  ````
  
  
@@ -358,29 +354,68 @@ kind: Deployment
 metadata:
  name: mysql-deployment
  labels:
-   tier: mysql-db
+   tier: mysql-server
 spec:
  replicas: 1
  selector:
    matchLabels:
-     tier: mysql-db
+     tier: mysql-server
  template:
    metadata:
      labels:
-       tier: mysql-db
+       tier: mysql-server
    spec:
      containers:
      - name: mysql
        image: mysql:5.7
        env:
+       - name: MYSQL_ROOT_PASSWORD
+         value: osla
        - name: MYSQL_DATABASE
          value: toolingdb
        - name: MYSQL_USER
-         value: obafema
+         value: userconnect
        - name: MYSQL_PASSWORD
-         value: password123
-       - name: MYSQL_ROOT_PASSWORD
-         value: password1234
+         value: zigali
        ports:
        - containerPort: 3306
 ````
+
+* Creating Service manifest file for the MySQL database application called mysql-service.yaml and applying it
+
+````
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysqlserverhost
+  labels:
+    app: tooling-app
+spec:
+  selector:
+    tier: mysql-server
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+````
+Do port- forwarding ````kubectl port-forward svc/tooling-service 5000:80 -n obafema````
+
+
+![image](https://user-images.githubusercontent.com/87030990/188998762-3aa0d012-7d60-4067-9801-64c1c3c011ba.png)
+
+
+* Accessing the tooling app from the browser:
+
+There was a challenge in accessing the tooling app from the browser as the pod was running but could not connect to the database 
+
+![image](https://user-images.githubusercontent.com/87030990/189211149-81b82976-f74f-4f25-8fd2-8e4064853205.png)
+
+Resolution: Environment variable for the database properly defined in the** mysql-deploy.yaml** file while also creating environment variable for the tooling app in the **tooling-deploy.yaml** file. mysql deployment and service were deleted and recreated. 
+
+![image](https://user-images.githubusercontent.com/87030990/189218021-cb1dc5f9-5b41-41a7-ad9d-237b09f5d665.png)
+
+![image](https://user-images.githubusercontent.com/87030990/189217345-b608839c-7d62-450b-906c-8ec30e6216ed.png)
+
+* The tooling_app was then successfully accessed through the browser: localhost:5000
+
+![image](https://user-images.githubusercontent.com/87030990/189210805-419f835b-21b0-44f9-8ecc-830fe15009b9.png)
