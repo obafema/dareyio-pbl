@@ -8,7 +8,7 @@ Prerequisite: Setting Up AWS Elastic Kubernetes Service With EKSCTL
 
 * **kubectl** – A command line tool for working with Kubernetes clusters.
 
-* **eksctl** – A command line tool for working with EKS clusters that automates many individual tasks. This guide requires that you use version 0.112.0 or later. For more information, see Installing or updating eksctl.
+* **eksctl** – A command line tool for working with EKS clusters that automates many individual tasks.
 
 * **Required IAM permissions** – The IAM security principal that you're using must have permissions to work with Amazon EKS IAM roles and service linked roles,
 
@@ -83,8 +83,11 @@ EOF
 
 * Task
 Verify that the pod is running
+
 Check the logs of the pod
+
 Exec into the pod and navigate to the nginx configuration file /etc/nginx/conf.d
+
 Open the config files to see the default configuration.
 
 ![image](https://user-images.githubusercontent.com/87030990/191245474-b1788305-6fe3-4600-97b7-146c20427859.png)
@@ -96,7 +99,7 @@ The nodes on which pods are running must be AWS EC2 instances.
 Those instances need to be in the same region and availability zone as the EBS volume
 EBS only supports a single EC2 instance mounting a volume
 
-* When creating a volume it must exists in the same region and availability zone as the EC2 instance running the pod. To confirm which node is running the pod:````kubectl get pod nginx-deployment-6fdcffd8fc-cppkv -n obafema -o wide````
+* When creating a volume it must exists in the same region and availability zone as the EC2 instance running the pod. To confirm which node is running the pod:````kubectl get pod nginx-deployment-6fdcffd8fc-7prwc -n obafema -o wide````
 
 * To check the Availability Zone where the node is running:````kubectl descride node ip-192-168-45-154.us-east-2.compute.internal -n obafema````
 
