@@ -6,8 +6,7 @@
 
 * Create a Kubernetes EKS cluster using Terraform and dynamically add scalable worker nodes
 * Deploy multiple applications using HELM
-* Explore more kubernetes objects and how to use them with Helm. Such as Dynamic provisioning of volumes to make pods stateful
-* Improve upon your CI/CD skills with Jenkins
+
 
 ### Step 1: Configuring The Terraform Module For EKS
 
@@ -603,4 +602,4 @@ Note: This is because the pod has a Sidecar container alongside with the Jenkins
 
 ![image](https://user-images.githubusercontent.com/87030990/192059263-b75667e1-d790-46a3-9f47-fbc52c16b844.png)
 
-* Port forwarding to access grafana from the UI: ````kubectl port-forward svc/my-release 8000:80 -n obafema````
+
