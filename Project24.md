@@ -375,6 +375,18 @@ provider "kubernetes" {
 
 ![image](https://user-images.githubusercontent.com/87030990/191970356-989e176e-90d3-4e45-b54d-99b5377e61b7.png)
 
+* While trying to connect to the cluster to check nodes, I gotthe error below:
+
+![image](https://user-images.githubusercontent.com/87030990/192008909-63ab722e-1c65-47ca-93d4-344478342d59.png)
+
+* The kubeconfig file for the cluster was updated using: ````aws eks --region us-east-2 update-kubeconfig --name tooling-app-eks````
+
+![image](https://user-images.githubusercontent.com/87030990/192009507-cf35a795-a05b-4058-8afb-7d6b6604ee9e.png)
+
+* A namespace called obafema was created for the implementation and connection to the cluster verified with: ````kubectl get nodes
+
+![image](https://user-images.githubusercontent.com/87030990/192011010-d007268d-a4af-489f-a4f4-9a0202bad842.png)
+![image](https://user-images.githubusercontent.com/87030990/192011118-afb260ba-3368-4253-9ef8-51a017d17e7f.png)
 
 ### Step 2: Installing Helm From Script
 
@@ -396,10 +408,199 @@ chmod 700 get_helm.sh # Changing the permission of the script
 
 ![image](https://user-images.githubusercontent.com/87030990/191605169-1618178c-67ef-4b8a-b2aa-7873d86ac354.png)
 
-* Install the chart: ````helm install jenkins jenkins/jenkins --n obafema````
+
+* Install the chart: ````helm install jenkins jenkins/jenkins --kubeconfig kubeconfig -n obafema````
 
 ![image](https://user-images.githubusercontent.com/87030990/191608248-6cf18df5-faae-4504-881d-db6ae7ed421b.png)
+![image](https://user-images.githubusercontent.com/87030990/192011730-77e1aff8-29d2-4a56-8def-ba3f6d14e6f1.png)
 
-* Check the Helm deployment
+
+* Check the Helm deployment: ````helm ls --kubeconfig kubeconfig -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192013626-0adb04b5-35a3-4c80-9953-0f2be0650758.png)
+
+* Check the pods: ````kubectl get pods --kubeconfig kubeconfig -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192014008-20a8261c-3b1f-441d-859b-0eff390a8f08.png)
 
 
+* Describe the running pod: ````kubectl describe pod jenkins-0 --kubeconfig kubeconfig -n obafema````
+* 
+![image](https://user-images.githubusercontent.com/87030990/192019174-ad85e9d7-87fb-4740-8cd5-02d2f758a5e7.png)
+
+* Check the logs of the running pod: ````kubectl logs jenkins-0 --kubeconfig kubeconfig -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192019868-4a614c23-85c5-47c6-a742-4ac80d3c3904.png)
+
+Note: This is because the pod has a Sidecar container alongside with the Jenkins container called **config-reload**. The config-reload is mainly to help Jenkins to reload its configuration without recreating the pod.
+
+* So, we specify the container we what to check its log: ````kubectl logs jenkins-0 -c jenkins --kubeconfig kubeconfig -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192022982-c8e6b785-c82d-48fd-8bfb-75e23ae438a3.png)
+
+* In order to run the kubectl commands without specifying the kubeconfig file, a package manager for kubectl called krew is installed so that it will enable us to install plugins to extend the functionality of kubectl:
+
+* Make sure that **git** is installed.
+
+* Run this command to download and install **krew**:
+
+````
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+````
+* Add the $HOME/.krew/bin directory to your PATH environment variable. To do this, update your .bashrc or .zshrc file and append the following line:
+
+````export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"````
+
+![image](https://user-images.githubusercontent.com/87030990/192024851-0eaddf94-2cdc-487a-a234-f2172843e768.png)
+
+* Installing Konfig plugin: ````kubectl krew install konfig````
+
+![image](https://user-images.githubusercontent.com/87030990/192025847-c8f61bf2-1b0f-42a4-b209-ee9ec5bf1768.png)
+
+* Import the kubeconfig into the default kubeconfig file: ````
+
+* To show all the contexts for the clusters configured in my kubeconfig. ````kubectl config get-contexts````
+
+![image](https://user-images.githubusercontent.com/87030990/192028513-fd84db27-34cb-4b1f-a481-bef7a99e1afa.png)
+
+
+* Set the current context to use for all kubectl and helm commands: ````kubectl config use-context [name of EKS cluster]````
+
+![image](https://user-images.githubusercontent.com/87030990/192029659-720c2ed5-be0b-4696-8023-577f79ba1327.png)
+
+
+* Test that it is working without specifying the --kubeconfig flag: ```` kubectl get po -n obafema````
+
+* Display the current context:````kubectl config current-context -n obafema````. This will let you know the context you are using to interact with Kubernetes
+
+![image](https://user-images.githubusercontent.com/87030990/192030377-e7ba77dd-243e-49cc-956f-4747e3425c2e.png)
+
+* To get the Jenkins administrator's password credential using the command provided on the screen when Jenkins was installed with Helm: 
+* ````kubectl exec --namespace obafema -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo````
+
+
+* Use port forwarding to access Jenkins from the UI
+
+![image](https://user-images.githubusercontent.com/87030990/192038545-7e6575a1-8982-40b8-86a0-6bcbe53e05ed.png)
+
+
+* Go to the browser localhost:8080 and authenticate with the username and password from number 1 above
+
+![image](https://user-images.githubusercontent.com/87030990/192038332-a2f7e86b-7f27-4856-8ca0-5fa63791ee0b.png)
+
+
+### Step 4: Deploying Artifactory With Helm
+
+* Adding the Artifactory's repository to helm: ````helm repo add jfrog https://charts.jfrog.io````
+
+* Updating helm repo: ````helm repo update````
+
+* To install the chart with the release name artifactory:````helm upgrade --install artifactory --namespace artifactory jfrog/artifactory````
+
+![image](https://user-images.githubusercontent.com/87030990/192040890-7786f9ab-e33b-4a12-9847-836bc25e8646.png)
+
+
+### Step 5: Deploying Hashicorp Vault With Helm
+
+* Adding the Hashicorp's repository to helm: ````helm repo add hashicorp https://helm.releases.hashicorp.com````
+
+* Installing the chart: ````helm install vault hashicorp/vault -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192041675-064187ed-e18d-445a-ab50-a918d1557f91.png)
+
+
+* To check the installation, run get pods and service on the namespaces
+
+![image](https://user-images.githubusercontent.com/87030990/192042740-b727bb48-b07f-496b-948d-6b07f0f6292c.png)
+
+* Port forwarding to access Hashicorp vault from the UI: ````kubectl port-forward svc/vault 8089:8200 -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192043308-b9f1f38d-7f22-44e7-a495-26ab24e82d0f.png)
+
+
+* Accessing the app from the browser: ````http://localhost:8089````
+
+![image](https://user-images.githubusercontent.com/87030990/192043249-6e33c08e-6b58-47dd-bea6-4fed33265b34.png)
+
+
+### Step 6: Deploying Prometheus With Helm
+
+* Adding the prometheus's repository to helm: ````helm repo add prometheus-community https://prometheus-community.github.io/helm-charts -n obafema````
+* Updating helm repo: ````helm repo update````
+
+![image](https://user-images.githubusercontent.com/87030990/192047187-9fc979f9-3ab3-40b5-a3f5-71944ba4f20a.png)
+
+* Installing the chart: ````helm install prometheus prometheus-community/prometheus -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192048068-186f6411-8795-48ed-a725-33fa1eff7685.png)
+
+
+* Inspecting the installation shows that there are various pods and services created
+
+* Port forwarding to access prometheus for alert manager from the UI: ````kubectl port-forward svc/prometheus-alertmanager 8000:80 -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192049216-aecbb118-be1b-4cb0-8249-d3998574ac89.png)
+
+* Accessing the app from the browser: ````http://localhost:8000````
+
+![image](https://user-images.githubusercontent.com/87030990/192049038-14e53118-9217-40c5-a1ed-8042c14a4bda.png)
+
+* Port forwarding to access prometheus for kube state metrics from the UI: ````kubectl port-forward svc/prometheus-kube-state-metrics 8000:8080 -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192053880-db954049-e023-482c-9e80-18f769ee520e.png)
+
+* Accessing the app from the browser: ```http://localhost:8000````
+
+![image](https://user-images.githubusercontent.com/87030990/192053818-b501c939-d4d9-4ca1-b1ce-f08b7e32306f.png)
+
+* Port forwarding to access prometheus for pushgateway from the UI: ````kubectl port-forward svc/prometheus-pushgateway 8000:9091 -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192056161-cf691720-d328-403c-a44d-04afbee995ca.png)
+
+
+* Accessing the app from the browser: ```http://localhost:8000````
+
+![image](https://user-images.githubusercontent.com/87030990/192056090-7e57eec1-88b2-405d-8aea-3794b665fcfc.png)
+
+### Step 6: Deploying Grafana With Helm
+
+* Adding the grafana's repository to helm: ````helm repo add grafana https://grafana.github.io/helm-charts````
+* Updating helm repo: ````helm repo update````
+
+![image](https://user-images.githubusercontent.com/87030990/192056823-34a529c9-e100-40ea-b71e-f77bdac78bb0.png)
+
+* Installing the Chart: ````helm install my-grafana grafana/grafana -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192057241-0a0fde01-1b0e-4874-b23b-27c3b077224c.png)
+
+* Port forwarding to access grafana from the UI: ````kubectl port-forward svc/my-grafana 8000:80 -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192057561-c87e2e9e-f00c-4e08-9cdf-d503de04ee32.png)
+
+
+* Accessing the app from the browser: ```http://localhost:8000````
+
+![image](https://user-images.githubusercontent.com/87030990/192057473-2779d997-2a97-4d8c-a328-9a3155d9b11f.png)
+
+![image](https://user-images.githubusercontent.com/87030990/192057975-9a2a98b5-b31e-4b78-8b04-4feb92183c7c.png)
+
+### Step 7: Deploying Elasticsearch With Helm
+
+* Adding the grafana's repository to helm: ````hhelm repo add bitnami https://charts.bitnami.com/bitnami````
+* Updating helm repo: ````helm repo update````
+
+![image](https://user-images.githubusercontent.com/87030990/192058863-fa3f9590-ac7a-4873-93ef-3bfeb9251f8b.png)
+
+* Installing the Chart: ````helm install my-release bitnami/elasticsearch -n obafema````
+
+![image](https://user-images.githubusercontent.com/87030990/192059263-b75667e1-d790-46a3-9f47-fbc52c16b844.png)
+
+* Port forwarding to access grafana from the UI: ````kubectl port-forward svc/my-release 8000:80 -n obafema````
