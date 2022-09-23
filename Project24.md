@@ -23,20 +23,28 @@
 *  **backend.tf** file was created to configure the backend for remote state in S3 
 
 ````
+#############################
+##creating bucket for s3 backend
+#########################
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "eks-terraform-s3bucket"
-  force_destroy = true
-  # Enable versioning so we can see the full revision history of our
-  # state files
-  versioning {
-    enabled = true
+
+force_destroy = true
+}
+
+resource "aws_s3_bucket_versioning" "versioning_terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
   }
-  # Enable server-side encryption by default
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
     }
   }
 }
@@ -50,17 +58,6 @@ resource "aws_dynamodb_table" "terraform_locks" {
     type = "S"
   }
 }
-
-output "s3_bucket_arn" {
-  value       = aws_s3_bucket.terraform_state.arn
-  description = "The ARN of the S3 bucket"
-}
-output "dynamodb_table_name" {
-  value       = aws_dynamodb_table.terraform_locks.name
-  description = "The name of the DynamoDB table"
-}
-
-# Create the resources first, then uncomment the backend section,re-initialise terraform and apply again
 
 # terraform {
 #   backend "s3" {
@@ -355,11 +352,29 @@ provider "kubernetes" {
 }
 ````
 
+* Then recreate the resources.
+
 ![image](https://user-images.githubusercontent.com/87030990/191564666-0692e3b4-d59c-4285-b088-6fa39bdc8fd2.png)
 
 ![image](https://user-images.githubusercontent.com/87030990/191565064-138a61c7-dab4-4f55-8791-8b706bfe7059.png)
 
-* Create kubeconfig file using awscli: ````aws eks --region us-east-2 update-kubeconfig --name tooling-app-eks````
+
+* After creating the resources first, then uncomment the backend section,re-initialise terraform and apply again
+
+ terraform {
+   backend "s3" {
+     bucket         = "eks-terraform-s3bucket"
+     key            = "global/s3/terraform.tfstate"
+     region         = "us-east-2"
+     dynamodb_table = "terraform-locks"
+     encrypt        = true
+   }
+ }
+
+* Create kubeconfig file using awscli: ````aws eks update-kubecofig --name tooling-app-eks --region us-east-2 --kubeconfig kubeconfig````
+
+![image](https://user-images.githubusercontent.com/87030990/191970356-989e176e-90d3-4e45-b54d-99b5377e61b7.png)
+
 
 ### Step 2: Installing Helm From Script
 
@@ -381,7 +396,7 @@ chmod 700 get_helm.sh # Changing the permission of the script
 
 ![image](https://user-images.githubusercontent.com/87030990/191605169-1618178c-67ef-4b8a-b2aa-7873d86ac354.png)
 
-* Install the chart: ````helm install jenkins jenkins/jenkins --namespace obafema````
+* Install the chart: ````helm install jenkins jenkins/jenkins --n obafema````
 
 ![image](https://user-images.githubusercontent.com/87030990/191608248-6cf18df5-faae-4504-881d-db6ae7ed421b.png)
 
