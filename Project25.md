@@ -20,7 +20,7 @@ Prerequisute:
 
 * Number nodes created was confirmed using: ````kubectl get nodes````
 
-![image](https://user-images.githubusercontent.com/87030990/195843978-db9ec051-b429-4330-89c9-d3fc348c859f.png)
+![image](https://user-images.githubusercontent.com/87030990/196551578-5581a956-d119-4fe5-bbe3-50897ee00e5b.png)
 
 
 #### Step 1: Deploy Jfrog Artifactory into Kubernetes
@@ -37,7 +37,7 @@ The best approach to easily get Artifactory into kubernetes is to use helm.
 
 ![image](https://user-images.githubusercontent.com/87030990/195846556-adda2657-ed20-49bf-b34e-3a8d24516aab.png)
 
-* Install artifactory in the newly created namespace: ````helm upgrade --install artifactory jfrog/artifactory --version 107.46.6 -n tools````
+* Install artifactory in the newly created namespace: ````helm upgrade --install artifactory jfrog/artifactory --version 107.38.10 -n tools````
 
 ![image](https://user-images.githubusercontent.com/87030990/195847462-411a2546-96f8-468c-adc3-1ca16e64eab3.png)
 
