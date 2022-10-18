@@ -42,6 +42,53 @@ The best approach to easily get Artifactory into kubernetes is to use helm.
 ![image](https://user-images.githubusercontent.com/87030990/195847462-411a2546-96f8-468c-adc3-1ca16e64eab3.png)
 
 
+Checking the pod status: ````kubectl get pod -n tools````
+
+![image](https://user-images.githubusercontent.com/87030990/196150419-b1bfacbe-a5c5-437e-b961-87f84f13eb97.png)
+
+Artifactory was uninstalled and then downgraded by installing a lower version. The pod is running but not ready.
+
+* Doing ````kubectl describe po artifactory-0 -n tools```` returned "startup probe failed" warning
+
+![image](https://user-images.githubusercontent.com/87030990/196151300-2d930623-43ed-442c-9852-606afde616ad.png)
+
+
+![image](https://user-images.githubusercontent.com/87030990/196150249-7e327ce1-a101-45e3-98f9-2030f4259287.png)
+
+
+#### Step 2: Deploy Nginx Ingress Controller
+
+Note: This controller is maintained by Kubernetes, there is an official guide the installation process. Hence, **artifacthub.io** was not used for the deployment.
+
+* Install Nginx Ingress Controller in the ingress-nginx namespace
+
+````
+helm upgrade --install ingress-nginx ingress-nginx \
+--repo https://kubernetes.github.io/ingress-nginx \
+--namespace ingress-nginx --create-namespace
+````
+
+![image](https://user-images.githubusercontent.com/87030990/196229192-cdadda4b-cf64-4079-b0d0-5b317979e91f.png)
+
+* A few pods should start in the ingress-nginx namespace:````kubectl get pods --namespace=ingress-nginx````
+
+* After a while, they should all be running. The following command will wait for the ingress controller pod to be up, running, and ready:
+
+````
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+````
+
+* Check to see the created load balancer in AWS. ````kubectl get service -n ingress-nginx````
+
+![image](https://user-images.githubusercontent.com/87030990/196230736-42f51273-5706-4190-abe9-ede634f76304.png)
+
+* Check the IngressClass that identifies this ingress controller: ````kubectl get ingressclass -n ingress-nginx````
+
+![image](https://user-images.githubusercontent.com/87030990/196232174-30b8c7ff-19b3-4313-9f7d-475097c49a80.png)
+
 
 
 
