@@ -95,27 +95,37 @@ Defaulted container "artifactory" out of: artifactory, delete-db-properties (ini
 
 *  The command ````kubectl get svc artifactory-artifactory-nginx -n tools```` was ran to retrieve the Load Balancer URL
 
-* artifactory-artifactory-nginx pod was converted to ClusterIP service type from Load Balancer service type to achieve cost reduction strategy
+![image](https://user-images.githubusercontent.com/87030990/197291586-4054019b-71e5-49c1-8483-5f0b0562d746.png)
+
+* Artifactory was accessed using the Load Balancer URL and the default username and password:
+
+![image](https://user-images.githubusercontent.com/87030990/197291775-a3d7f99e-0169-48f4-a25e-08fa8c796eb8.png)
+![image](https://user-images.githubusercontent.com/87030990/197292152-e18a4447-6c8b-45d8-9ee3-748e30590c22.png)
+
+
+Setting the service type to **Load Balancer** is the easiest way to get started with exposing applications running in kubernetes externally. But provissioning load balancers for each application can become very expensive over time, and more difficult to manage especially when tens or even hundreds of applications are deployed.
+
+* Let us explore **ClusterIP** service type which is relatively cheaper to run
 
 * To get the postgresql paasword: ````POSTGRES_PASSWORD=$(kubectl get secret -n tools artifactory-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)```` was ran
+
+![image](https://user-images.githubusercontent.com/87030990/197293829-615f85ed-8fc8-4a77-be7e-2eb3a6d52fab.png)
+
 
 * Convert Artifactory-nginx service-type from Load Balancer to ClusterIP
 
 ```` helm upgrade artifactory jfrog/artifactory --set postgresql.postgresqlPassword=${POSTGRES_PASSWORD} --namespace tools --set databaseUpgradeReady=true --set nginx.service.type=ClusterIP````
 
-![image](https://user-images.githubusercontent.com/87030990/196540649-466b50a7-fb04-4143-ba3b-69c056e641d2.png)
-![image](https://user-images.githubusercontent.com/87030990/196540772-d50e48ec-80ee-4bc0-918c-4e6a4af9e23f.png)
+![image](https://user-images.githubusercontent.com/87030990/197293896-20071af0-7cbd-475f-a95a-3bbfef3e4f7f.png)
 
 * Port forwarding to access Artifactory from the UI was down: ````kubectl port-forward svc/artifactory 8082:8082 -n tools````
 
-![image](https://user-images.githubusercontent.com/87030990/196540943-04c5e997-410a-418a-b20b-8b0f30a3c60b.png)
+![image](https://user-images.githubusercontent.com/87030990/197293975-9983b8fe-f2cd-4fa9-baa7-a7be80e51ac6.png)
 
-* Artifactory was accessed using ````http://127.0.0.1:8082/`````
+* Artifactory was accessed using ````http://127.0.0.1:8082/ or http://localhost:8082 `````
 
-![image](https://user-images.githubusercontent.com/87030990/196534156-87f4687b-998f-4212-8b41-b105d1af2d8a.png)
-
-
-![image](https://user-images.githubusercontent.com/87030990/196537110-3c48c862-41fa-4404-9f34-94dff5693b73.png)
+![image](https://user-images.githubusercontent.com/87030990/197294101-3917c767-9862-4dce-b540-ab86f270071f.png)
+![image](https://user-images.githubusercontent.com/87030990/197294217-b8c53fac-b8af-4463-8a3c-5bbadcc9cc20.png)
 
 
 
