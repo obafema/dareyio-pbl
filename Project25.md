@@ -74,9 +74,26 @@ Defaulted container "artifactory" out of: artifactory, delete-db-properties (ini
 
 * Doing kubectl describe node on the node that was failing intermettently returned **InSufficientMemory** error. 
 
-* The instance type was then scaled up from **t3.medium** to **t3.large** for performance and artifactory-0 became ready
+* The instance type was then scaled up from **t3.medium** to **t3.large** for improved performance and artifactory-0 became ready
 
 ![image](https://user-images.githubusercontent.com/87030990/196540443-6b8dceb1-608d-47e9-88b5-7cbc6512cbd6.png)
+
+* artifactory-nginx however was still not ready.
+
+![image](https://user-images.githubusercontent.com/87030990/197289528-56dcb257-848d-4972-a415-4122ea34bdb4.png)
+
+* Kubectl describe done on the artifactory-nginx pod returned **startup probe failed** error but no output returned with ````kubectl logs````
+
+![image](https://user-images.githubusercontent.com/87030990/197289954-5582346e-80de-4588-aab5-43c4c4d2082c.png)
+![image](https://user-images.githubusercontent.com/87030990/197290050-37e3b877-b01f-4014-894f-18c1e68c7808.png)
+
+* Further troubleshooting was carried out by login in to the artifact-nginx pod. Connection was terminated abruptly wjile returning error code 137 which is related to memory issue:
+
+* The instance type again scaled up from **t3.large** to **t3.2xlarge** for improved performance and artifactory-nginx became ready
+
+![image](https://user-images.githubusercontent.com/87030990/197291057-ef347747-222d-4697-b935-3e1cf8abb001.png)
+
+*  The command ````kubectl get svc artifactory-artifactory-nginx -n tools```` was ran to retrieve the Load Balancer URL
 
 * artifactory-artifactory-nginx pod was converted to ClusterIP service type from Load Balancer service type to achieve cost reduction strategy
 
