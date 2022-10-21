@@ -129,13 +129,10 @@ Setting the service type to **Load Balancer** is the easiest way to get started 
 
 
 
-#### Step 2: Deploy Nginx Ingress Controller
+#### Step 2: Deploy Nginx Ingress Controller and managing Ingress Resources
 
-* Setting the service type to **Load Balancer** is the easiest way to get started with exposing applications running in kubernetes externally. But provissioning load balancers for each application can become very expensive over time, and more difficult to manage. Especially when tens or even hundreds of applications are deployed.
+* Setting the service type to **Load Balancer** is the easiest way to expose application running in Kubernetes externally, the best approach is to use **Kubernetes Ingress** instead. But to do that, we will have to deploy an **Ingress Controller**. A huge benefit of using the **ingress controller** is that we will be able to use a **single load balancer** for different applications we deploy.
 
-* The best approach is to use **Kubernetes Ingress** instead. But to do that, we will have to deploy an **Ingress Controller**. A huge benefit of using the **ingress controller** is that we will be able to use a **single load balancer** for different applications we deploy.
-
-Note: This controller is maintained by Kubernetes, there is an official guide the installation process. Hence, **artifacthub.io** was not used for the deployment. 
 
 * Install Nginx Ingress Controller in the ingress-nginx namespace
 
@@ -156,19 +153,19 @@ helm upgrade --install ingress-nginx ingress-nginx \
 ![image](https://user-images.githubusercontent.com/87030990/197180419-035b7e8b-3224-4860-9252-f48b94aefd28.png)
 ![image](https://user-images.githubusercontent.com/87030990/197180585-bb521eca-9de1-41d5-8cef-7b8304d5fd5a.png)
 
-* Add repo: ````helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx````
+* Add repo: ````helm repo add bitnami https://charts.bitnami.com/bitnami````
 
 ![image](https://user-images.githubusercontent.com/87030990/197180729-c12d7603-6e40-4dbd-8d73-9ee773df9df3.png)
 
 * Update repo if required: ````helm repo update````
 
-* Install Chart: ````helm upgrade --install my-ingress-nginx ingress-nginx/ingress-nginx --version 4.3.0 -n ingress-nginx````
+* Install Chart: ````````helm install nginx-ingress-controller bitnami/nginx-ingress-controller -n ingress-nginx````
 
-![image](https://user-images.githubusercontent.com/87030990/197180937-ca047d1f-8568-415e-868b-49a30b200584.png)
+![image](https://user-images.githubusercontent.com/87030990/197295504-c77058d9-ca72-4a23-836e-83ff75408763.png)
 
 * A few pods should start in the ingress-nginx namespace: ````kubectl get pods --namespace=ingress-nginx````
 
-![image](https://user-images.githubusercontent.com/87030990/197181267-d6c127eb-fd2b-49a5-8505-d67507ddf750.png)
+![image](https://user-images.githubusercontent.com/87030990/197295567-5fe85958-be5e-4afc-a890-6ab9394c764b.png)
 
 * After a while, they should all be running. The following command will wait for the ingress controller pod to be up, running, and ready:
 
@@ -181,8 +178,8 @@ kubectl wait --namespace ingress-nginx \
 
 * Check to see the created load balancer in AWS. ````kubectl get service -n ingress-nginx````
 
-![image](https://user-images.githubusercontent.com/87030990/197181768-de4843c9-dc37-4a82-98b1-c3c9bf1924b6.png)
-![image](https://user-images.githubusercontent.com/87030990/197181573-1ba73f2b-7dd6-4096-99d1-3495d7a08a84.png)
+![image](https://user-images.githubusercontent.com/87030990/197295660-7f6657ef-5848-4ba9-9cb5-09924e07de58.png)
+![image](https://user-images.githubusercontent.com/87030990/197295756-b764863d-cf97-474b-9e32-bae0d1891041.png)
 
 Note: The ingress-nginx-controller service that was created is of the type LoadBalancer. That will be the load balancer to be used by all applications which require external access, and is using this ingress controller.
 
