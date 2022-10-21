@@ -190,8 +190,63 @@ Note: The ingress-nginx-controller service that was created is of the type LoadB
 
 #### Step 3: Deploy Artifactory Ingress
 
+* Artifactory Ingress was configured for traffic to be routed to the Artifactory internal service through the ingress controller’s load balancer
+
+* Artifactory-ingress.yaml file was created for deployment of artifactory ingress
+
+````
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: artifactory
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "tooling.artifactory.agoone.link"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: artifactory
+            port:
+              number: 8082
+
+  - host: "www.tooling.artifactory.agoone.link"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: artifactory
+            port:
+              number: 8082
+ ````
+ 
+ * Artifactory ingress was deployed using ````kubectl apply -f artifactory-ingress.yaml -n tools````
+
+#### Step 3: Register Domain and Configure DNS
+
+A domain named agoone.link was registered and Route53 records with subdomain **tooling.artifactory** added was created to the ingress controller’s loadbalancer
+
+![image](https://user-images.githubusercontent.com/87030990/197297407-e4c0fc1c-f6ed-492a-be5d-d5298a519944.png)
+
+* DNS record was confirmed to be properly propergated by visiting https://dnschecker.org
+
+![image](https://user-images.githubusercontent.com/87030990/197297986-3bc9bcff-7046-4460-93f5-f513a43579f2.png)
 
 
+* Visiting the application from the browser
 
+On Chrome browser
 
+The website is reachable but insecured 
+
+![image](https://user-images.githubusercontent.com/87030990/197298199-4d42f543-6c2f-4b58-8115-a8d3969e83e7.png)
+
+Nginx Ingress Controller does configure a default TLS/SSL certificate which is not trusted because it is a self signed certificate that browsers are not aware of.
+
+![image](https://user-images.githubusercontent.com/87030990/197298440-f51c739e-7295-4cc5-823c-382a2fc9975c.png)
 
