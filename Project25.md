@@ -87,7 +87,7 @@ Defaulted container "artifactory" out of: artifactory, delete-db-properties (ini
 ![image](https://user-images.githubusercontent.com/87030990/197289954-5582346e-80de-4588-aab5-43c4c4d2082c.png)
 ![image](https://user-images.githubusercontent.com/87030990/197290050-37e3b877-b01f-4014-894f-18c1e68c7808.png)
 
-* Further troubleshooting was carried out by login in to the artifact-nginx pod. Connection was terminated abruptly wjile returning error code 137 which is related to memory issue:
+* Further troubleshooting was carried out by login in to the container inside the **artifact-nginx** pod. Connection was terminated abruptly wjile returning error code 137 which is related to memory issue:
 
 * The instance type again scaled up from **t3.large** to **t3.2xlarge** for improved performance and artifactory-nginx became ready
 
@@ -202,18 +202,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: "tooling.artifactory.agoone.link"
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: artifactory
-            port:
-              number: 8082
-
-  - host: "www.tooling.artifactory.agoone.link"
+  - host: "artifactory.agoone.link"
     http:
       paths:
       - path: /
@@ -229,13 +218,13 @@ spec:
 
 #### Step 3: Register Domain and Configure DNS
 
-A domain named agoone.link was registered and Route53 records with subdomain **tooling.artifactory** added was created to the ingress controller’s loadbalancer
+A domain named agoone.link was registered and Route53 records with subdomain **artifactory** added was created to the ingress controller’s loadbalancer
 
-![image](https://user-images.githubusercontent.com/87030990/197297407-e4c0fc1c-f6ed-492a-be5d-d5298a519944.png)
+![image](https://user-images.githubusercontent.com/87030990/197337507-db215942-46bb-4225-ba96-909fc10fc046.png)
 
 * DNS record was confirmed to be properly propergated by visiting https://dnschecker.org
 
-![image](https://user-images.githubusercontent.com/87030990/197297986-3bc9bcff-7046-4460-93f5-f513a43579f2.png)
+![image](https://user-images.githubusercontent.com/87030990/197337417-676fc68e-92b6-429c-8ecd-03aa8191ebe6.png)
 
 
 * Visiting the application from the browser
@@ -244,9 +233,58 @@ On Chrome browser
 
 The website is reachable but insecured 
 
-![image](https://user-images.githubusercontent.com/87030990/197298199-4d42f543-6c2f-4b58-8115-a8d3969e83e7.png)
+![image](https://user-images.githubusercontent.com/87030990/197337401-8a77b3b1-88b9-473f-aafa-d352a606b1b7.png)
 
-Nginx Ingress Controller does configure a default TLS/SSL certificate which is not trusted because it is a self signed certificate that browsers are not aware of.
 
-![image](https://user-images.githubusercontent.com/87030990/197298440-f51c739e-7295-4cc5-823c-382a2fc9975c.png)
+* Nginx Ingress Controller does configure a default TLS/SSL certificate which is not trusted because it is a self signed certificate that browsers are not aware of.
+
+![image](https://user-images.githubusercontent.com/87030990/197345164-cc2fbd8b-038c-4180-8a4f-3347ba25cc61.png)
+![image](https://user-images.githubusercontent.com/87030990/197345226-5e6d7a32-a647-4aae-8a31-36fd2af8683c.png)
+
+
+* Explore Artifactory Web UI
+
+* Get the default username and password using: ````helm test artifactory -n tools````
+
+![image](https://user-images.githubusercontent.com/87030990/197337920-97513a3b-9aab-47da-8a6b-44b1f805280d.png)
+
+* Insert the username and password to Get Started:
+
+![image](https://user-images.githubusercontent.com/87030990/197337493-d43039d6-dd33-49a9-b903-cbcd9c16e9b3.png)
+
+
+* Change your admin password to your choice, Activate Artifactory Licence, Set the Base URL and Ensure to use https. Skip other configuration part. 
+
+![image](https://user-images.githubusercontent.com/87030990/197338464-258360ae-d12c-4108-846f-b5286ddcbea2.png)
+
+![image](https://user-images.githubusercontent.com/87030990/197338500-8442c160-3f25-423d-b9a0-c8ad03967682.png)
+
+
+#### Step 4: Deploying Cert-Manager and Managing TLS/SSL for Ingress
+
+* Deploying Cert-manager
+
+* Installing the Chart
+
+* Install first, the **cert-manager CustomResourceDefinition** resources that helps to uninstall and reinstall cert-manager without deleting your installed custom resources. ````$ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.10.0/cert-manager.crds.yaml````
+
+![image](https://user-images.githubusercontent.com/87030990/197343637-bed1c3fa-79fd-4967-8ee7-5e232c082005.png)
+
+* To install the chart
+
+* Add cert-manager repo: ````helm repo add jetstack https://charts.jetstack.io````
+
+* Install the cert-manager helm chart: ````helm install my-release --namespace cert-manager --version v1.10.0 jetstack/cert-manager
+
+![image](https://user-images.githubusercontent.com/87030990/197345488-149bf519-4e6d-4b92-a5c4-1aa5c130414c.png)
+
+* Certificate Issuer. Cluster Issuer was used so it could be scoped globally
+
+![image](https://user-images.githubusercontent.com/87030990/197346550-620d76d0-3a46-4ba9-b06e-166e847754c0.png)
+
+
+
+
+
+
 
