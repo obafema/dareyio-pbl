@@ -274,16 +274,72 @@ The website is reachable but insecured
 
 * Add cert-manager repo: ````helm repo add jetstack https://charts.jetstack.io````
 
-* Install the cert-manager helm chart: ````helm install my-release --namespace cert-manager --version v1.10.0 jetstack/cert-manager
+* Update repo: ````helm repo update````
 
-![image](https://user-images.githubusercontent.com/87030990/197345488-149bf519-4e6d-4b92-a5c4-1aa5c130414c.png)
+* Install CustomResourceDefinitions: ````kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.10.0/cert-manager.crds.yaml````
+
+![image](https://user-images.githubusercontent.com/87030990/197352587-effbf402-5a5a-4e26-8934-2324af05f8bb.png)
+
+
+* Install the cert-manager helm chart:
+
+````
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.10.0
+````
+
+![image](https://user-images.githubusercontent.com/87030990/197356381-e8c44bc4-f1f6-4fb1-b527-906fc22d1f8b.png)
+
 
 * Certificate Issuer. Cluster Issuer was used so it could be scoped globally
 
 ![image](https://user-images.githubusercontent.com/87030990/197346550-620d76d0-3a46-4ba9-b06e-166e847754c0.png)
 
 
+#### Step 5: Configuring Ingress for TLS
 
+* Update the Artifactory Ingress manifest with TLS specific configurations and redeploy.
+
+````
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: nginx
+  name: artifactory
+spec:
+  rules:
+  - host: "artifactory.agoone.link"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: artifactory
+            port:
+              number: 8082
+  tls:
+  - hosts:
+    - "artifactory.agoone.link"
+    secretName: "artifactory.agoone.link"
+ ````
+ ![image](https://user-images.githubusercontent.com/87030990/197347024-933a703e-9531-4b44-acbf-b766864f3d70.png)
+
+* Run ````kubectl get certificate```` to verify deployment
+
+![image](https://user-images.githubusercontent.com/87030990/197360187-4602842b-7435-4e44-854e-99931fdfb0d3.png)
+
+ 
+![image](https://user-images.githubusercontent.com/87030990/197361906-cecb5d5b-bc7f-4f51-8dca-e8bb0bdc35e3.png)
+
+![image](https://user-images.githubusercontent.com/87030990/197361931-b02f498b-effc-4940-8c74-75f7a0a645e8.png)
+
+![image](https://user-images.githubusercontent.com/87030990/197361974-8d198577-414f-4911-ab2c-30aceccaee82.png)
 
 
 
