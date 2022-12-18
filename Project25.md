@@ -89,6 +89,9 @@ Defaulted container "artifactory" out of: artifactory, delete-db-properties (ini
 
 * Further troubleshooting was carried out by login in to the container inside the **artifact-nginx** pod. Connection was terminated abruptly wjile returning error code 137 which is related to memory issue:
 
+![image](https://user-images.githubusercontent.com/87030990/208286361-dfa8deaa-7611-413a-80cf-4901ed8e9e9a.png)
+
+
 * The instance type again scaled up from **t3.large** to **t3.2xlarge** for improved performance and artifactory-nginx became ready
 
 ![image](https://user-images.githubusercontent.com/87030990/197291057-ef347747-222d-4697-b935-3e1cf8abb001.png)
