@@ -8,6 +8,11 @@ Prerequisute:
 
 * Create EKS Cluster 
 
+Error message while trying to create Infrastructure for the implementation
+![image](https://user-images.githubusercontent.com/87030990/224483313-7354f23b-9884-457c-8277-4040c2e43a00.png)
+
+Resolution: Cluster version was changed from version 1.21 to 1.24
+
 * Create **kubeconfig file** using awscli: ````aws eks update-kubecofig --name tooling-app-eks --region us-east-2 --kubeconfig kubeconfig````
 
 ![image](https://user-images.githubusercontent.com/87030990/195843577-1b89b2db-b867-48a3-84f4-111dc5a9c1f6.png)
