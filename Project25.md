@@ -13,7 +13,7 @@ Error message while trying to create Infrastructure for the implementation
 
 Resolution: Cluster version was changed from version 1.21 to 1.24
 
-* Create **kubeconfig file** using awscli: ````aws eks update-kubecofig --name tooling-app-eks --region us-east-2 --kubeconfig kubeconfig````
+* Create **kubeconfig file** using awscli: ````aws eks update-kubeconfig --name tooling-app-eks --region us-east-2 --kubeconfig kubeconfig````
 
 ![image](https://user-images.githubusercontent.com/87030990/195843577-1b89b2db-b867-48a3-84f4-111dc5a9c1f6.png)
 
